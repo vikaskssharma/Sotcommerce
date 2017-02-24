@@ -1,0 +1,74 @@
+/**
+ * 
+ */
+package com.sbsc.fos.common.vo;
+
+/**
+ * This class represents the User session information.
+ * 
+ * @author simanchal.patra
+ */
+public class SessionInfo {
+
+	private Long userId;
+
+	private Long storeId;
+
+	private String roleName;
+	
+	private String email;
+
+	public SessionInfo() {
+
+	}
+
+	public SessionInfo(Long userId, Long storeId) {
+		this.userId = userId;
+		this.storeId = storeId;
+	}
+
+	public SessionInfo(Long userId, Long storeId, String roleName) {
+		this.userId = userId;
+		this.storeId = storeId;
+		this.roleName = roleName;
+	}
+
+	/**
+	 * @return the userId
+	 */
+	public Long getUserId() {
+		return userId;
+	}
+
+	public String getRoleName() {
+		return roleName;
+	}
+
+	public void setRoleName(String roleName) {
+		this.roleName = roleName;
+	}
+
+	/**
+	 * @param userId
+	 *            the userId to set
+	 */
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	/**
+	 * @return the storeId
+	 */
+	public Long getStoreId() {
+		return storeId;
+	}
+
+	/**
+	 * @param storeId
+	 *            the storeId to set
+	 */
+	public void setStoreId(Long storeId) {
+		this.storeId = storeId;
+	}
+
+}

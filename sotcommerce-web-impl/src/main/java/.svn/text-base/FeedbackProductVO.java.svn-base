@@ -1,0 +1,64 @@
+/**
+ * 
+ */
+package com.sbsc.fos.feedback.common;
+
+import java.math.BigDecimal;
+
+/**
+ * @author Gaurav_Kumar
+ * 
+ */
+public class FeedbackProductVO {
+
+	private long prodId;
+
+	private String productName;
+
+	private String productDescription;
+
+	private BigDecimal productRating;
+
+	private String productReview;
+
+	public long getProdId() {
+		return prodId;
+	}
+
+	public void setProdId(long prodId) {
+		this.prodId = prodId;
+	}
+
+	public String getProductName() {
+		return productName;
+	}
+
+	public void setProductName(String productName) {
+		this.productName = productName;
+	}
+
+	public String getProductDescription() {
+		return productDescription;
+	}
+
+	public void setProductDescription(String productDescription) {
+		this.productDescription = productDescription;
+	}
+
+	public BigDecimal getProductRating() {
+		return productRating;
+	}
+
+	public void setProductRating(BigDecimal productRating) {
+		this.productRating = productRating;
+	}
+
+	public String getProductReview() {
+		return productReview;
+	}
+
+	public void setProductReview(String productReview) {
+		this.productReview = productReview;
+	}
+
+}

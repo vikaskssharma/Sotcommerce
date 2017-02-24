@@ -1,0 +1,22 @@
+package com.sbsc.fos.um.service;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+
+
+import com.sbsc.fos.persistance.UmTbUserRole;
+
+public interface UserRoleService {
+	
+	public void create(final UmTbUserRole entity);
+
+	public List<UmTbUserRole> findAll();
+
+	public UmTbUserRole findByID(final long id);
+
+	public List<UmTbUserRole> findAllByProperty(String propertyName, Object value);
+
+	public List<UmTbUserRole> findAllByProperty(HashMap<String, Object> properties);
+
+}

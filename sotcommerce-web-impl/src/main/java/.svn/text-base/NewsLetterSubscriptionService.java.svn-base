@@ -1,0 +1,93 @@
+package com.sbsc.fos.nls.service;
+
+import java.text.ParseException;
+import java.util.List;
+import java.util.Map;
+
+import com.sbsc.fos.common.vo.SessionInfo;
+import com.sbsc.fos.nls.common.CustomerSubscriptionVO;
+import com.sbsc.fos.nls.web.form.NewsSubscribeForm;
+import com.sbsc.fos.nls.web.form.UnsubscribeNewsletterForm;
+
+
+/**
+ * 
+ * Service to Newsletter Subscription
+ * 
+ * 
+ * 1) checks whether email is already subscribed
+ * 2) subscribes a new email ID
+ * 
+ * 
+ * @author abhishek.vishnoi
+ *
+ */
+public interface NewsLetterSubscriptionService {
+	
+	
+	/**
+	 * Service method to add email Id subscription to database
+	 * 
+	 * 
+	 */
+	public String AddSubscription(NewsSubscribeForm newsSubscribeForm) throws Exception;
+	
+	/**
+	 * 
+	 * 
+	 * @param sessionInfo
+	 * @param subscriberId
+	 * @return
+	 */
+	public boolean unsubscribe ( SessionInfo sessionInfo,  UnsubscribeNewsletterForm unsubscribeForm);
+	
+	/**
+	 * Service Method to find whether a record exists for given email ID
+	 * 
+	 * returns boolean flag 
+	 * 
+	 */
+	//public boolean findByProperty(NewsSubscribeForm newsSubscribeForm) throws Exception;
+	
+	/**
+	 * Service method to Delete a Subscriber.
+	 * 
+	 * @param subscriptionId
+	 * @param sessionInfo
+	 * @return
+	 */
+	public List<CustomerSubscriptionVO> deleteSubscriber(long subscriptionId,SessionInfo sessionInfo);
+	
+	/**
+	 * 
+	 * Service method to find List of Subscribers.
+	 * 
+	 * @param sessionInfo
+	 * @return
+	 */
+	public List<CustomerSubscriptionVO> findSubscriberList(SessionInfo sessionInfo);
+	
+	/**
+	 * 
+	 * Service method to Find a Subscriber.
+	 * 
+	 * @param sessionInfo
+	 * @return
+	 */
+	public UnsubscribeNewsletterForm findSubscriber(long subscriberId);
+	
+	
+	/**
+	 * Service metod to Filter the List of Subscribers.
+	 * 
+	 * 
+	 * @param filter_criteria
+	 * @param sessionInfo
+	 * @return
+	 * @throws ParseException
+	 */
+	public List<CustomerSubscriptionVO> findSusbcriberListByFilters(
+			Map<String, Object> filter_criteria, SessionInfo sessionInfo)
+			throws ParseException ;
+
+}

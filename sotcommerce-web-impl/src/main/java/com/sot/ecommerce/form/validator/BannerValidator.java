@@ -1,0 +1,388 @@
+/**
+ * 
+ */
+package com.sot.ecommerce.form.validator;
+
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
+
+import com.sbsc.fos.banner.web.form.AddBannerForm;
+import com.sbsc.fos.banner.web.service.BannerService;
+import com.sbsc.fos.persistance.BannerTbMaster;
+import com.sbsc.fos.promotion.web.handler.PromotionHandler;
+import com.sbsc.fos.utils.DateUtil;
+import com.sbsc.fos.utils.SBSConstants;
+
+/**
+ * @author vaibhav.jain
+ *
+ */
+@Component
+public class BannerValidator implements Validator{
+
+	private static final int BANNER_NAME_MIN_LENGTH = 5;
+
+	private static final int BANNER_NAME_MAX_LENGTH = 64;
+	
+	private static final int DISCOUNT_MAX_VALUE = 100;
+	
+	private static final String BANNER_NAME_PATTERN_SPECIAL_CHARACTER = "^[a-zA-Z0-9#& ._()%+-]*$"; //"^[a-zA-Z0-9]+([ \t-]?[a-zA-Z0-9]+)*$";
+	
+	private static final String RULE_CODE_PATTERN_ALPHANUMERIC = "^(?=.*[A-Za-z])(?=.*[0-9])[A-Za-z0-9]+$";
+	
+	
+	@Autowired
+	private BannerService bannerService;
+	
+	
+	@Override 
+	public boolean supports(Class<?> clazz) {
+		return BannerValidator.class.isAssignableFrom(clazz);
+	}
+
+	@Override
+	public void validate(Object command, Errors errors) {
+
+		AddBannerForm addBannerForm = (AddBannerForm) command;
+		
+		SimpleDateFormat view_date_format = new SimpleDateFormat(SBSConstants.DATE_MM_DD_YYYY_TIME);
+		
+		int imageCategoryFlag = 0;
+		
+		int imageProductFlag = 0;		
+		
+		//==========Banner Name Validation==========
+		if (StringUtils.isBlank(addBannerForm.getBannerName())) {
+			
+			errors.rejectValue("bannerName",
+					"add.banner.Name.blank"/*,
+					"Please enter Banner Name"*/);
+		}
+			
+		if (StringUtils.isNotBlank(addBannerForm.getBannerName())) {
+			
+			if (addBannerForm.getBannerName().length() < BANNER_NAME_MIN_LENGTH) {
+				errors.rejectValue("bannerName",
+						"add.banner.Name.min.length"/*,
+						"Banner Name should be greater than "
+								+ BANNER_NAME_MIN_LENGTH + " characters"*/);
+			}
+
+			if (addBannerForm.getBannerName().length() > BANNER_NAME_MAX_LENGTH) {
+				errors.rejectValue("bannerName",
+						"add.banner.Name.max.length"/*,
+						"Banner Name should not be greater than "
+								+ BANNER_NAME_MAX_LENGTH+ " characters"*/);
+			}
+			
+			if (!this.validatePattern(addBannerForm.getBannerName(),
+					BANNER_NAME_PATTERN_SPECIAL_CHARACTER)) {
+				errors.rejectValue("bannerName", 
+						"add.banner.Name.format"/*,
+						"Special Characters except _ and spaces are not allowed"*/);
+			}
+		}
+		
+		
+		//==========Banner APPLY TO Validation==========
+		if (StringUtils.isBlank(addBannerForm.getBannerApplyTo())) {
+			
+			errors.rejectValue("bannerName",
+					"add.banner.ApplyTo.blank"/*,
+					"Please enter Apply To"*/);
+		}		
+		
+		//==========Banner Category Validation==========
+/*		if(addBannerForm.getBannerApplyTo().equals("C") && addBannerForm.getBannerCategoryId().equals("0"))
+			errors.rejectValue("bannerCategoryId",
+					"add.banner.categoryId.blank",
+					"Please enter banner category");*/
+		
+		//==========Banner Page Validation==========
+		if(addBannerForm.getBannerApplyTo().equals("P") && addBannerForm.getBannerPageName().equals("0"))
+			errors.rejectValue("bannerPageName",
+					"add.banner.page.blank"/*,
+					"Please enter banner page"*/);
+		
+		//==========Banner Page Location Validation==========
+		if(addBannerForm.getBannerApplyTo().equals("P") && addBannerForm.getBannerPagePositionName().equals("0"))
+			errors.rejectValue("bannerPagePositionName",
+					"add.banner.pagePosition.blank"/*,
+					"Please enter banner page position"*/);
+
+		
+		//==========Banner Status Validation==========
+/*		if (!addBannerForm.getStatus().equals("InActive") && !addBannerForm.getStatus().equals("Active")) {
+			
+			errors.rejectValue("status",
+					"add.banner.status.not.selected",
+					"Please enter Status");
+		}*/
+		
+		//==========From Date Validation==========
+		if (StringUtils.isBlank(addBannerForm.getFromDate())) {
+			
+			errors.rejectValue("fromDate",
+					"add.promotion.fromDate.blank"/*,
+					"Please enter From Date"*/);
+		}
+		else{
+			Date fromDate = null;
+			Date toDate = null;
+			try {
+				fromDate = view_date_format.parse(addBannerForm.getFromDate());
+				Calendar now = Calendar.getInstance();
+				now.setTime(fromDate);
+				now.add(Calendar.MINUTE, 30);
+				Date fromDate_temp = now.getTime();
+				if(fromDate_temp.compareTo(new Date()) < 0 /*&& addBannerForm.getMode().equals("Add")*/)
+					errors.rejectValue("fromDate",
+							"add.promotion.fromDate.before.current.date"/*,
+							"'From Date' should be equal Or after current date/time"*/);
+			}catch (ParseException e) {
+				errors.rejectValue("fromDate",
+						"add.promotion.fromDate.incorrect.format"/*,
+						"'From Date' format should be 'MM-DD-YYYY HH:mm:ss'"*/);
+			}
+			if(!addBannerForm.getToDate().isEmpty()){
+				try {
+				toDate = view_date_format.parse(addBannerForm.getToDate());
+				if(toDate.compareTo(new Date()) < 0 /*&& addBannerForm.getMode().equals("Add")*/)
+					errors.rejectValue("toDate",
+							"add.promotion.toDate.before.current.date"/*,
+							"'To Date' should be equal Or after current date/time"*/);
+				else if(fromDate != null){
+					if(fromDate.compareTo(toDate) > 0 )
+						errors.rejectValue("fromDate",
+								"add.promotion.fromDate.before.toDate"/*,
+								"'From Date' should be equal Or after 'To Date'"*/);
+				}
+				}catch (ParseException e) {
+					errors.rejectValue("toDate",
+							"add.promotion.toDate.incorrect.format"/*,
+							"'To Date' format should be 'MM-DD-YYYY HH:mm:ss'"*/);
+				}
+			}
+		}
+		
+		//==========To Date Validation==========
+		if (StringUtils.isBlank(addBannerForm.getToDate())) {
+			errors.rejectValue("toDate",
+					"add.promotion.toDate.blank"/*,
+					"Please enter To Date"*/);
+		}
+		
+		
+		//==========Banner Image Validation==========
+		
+
+		//Image1
+		if(!addBannerForm.getProdImgPath1().isEmpty()){
+			if(addBannerForm.getCategoryImg1().toString().equals("0") && imageCategoryFlag == 0){
+				errors.rejectValue("categoryImg",
+						"add.banner.image.category.not.selected");
+				addBannerForm.setCategoryImg(new BigDecimal(1));
+				imageCategoryFlag = 1;
+			}
+			
+			if(addBannerForm.getProductImg1().toString().equals("0") && imageProductFlag == 0){
+				errors.rejectValue("productImg",
+						"add.banner.image.product.not.selected");
+				imageProductFlag = 1;
+			}
+		}
+		
+		//Image2
+		if(!addBannerForm.getProdImgPath2().isEmpty()){
+			if(addBannerForm.getCategoryImg2().toString().equals("0") && imageCategoryFlag == 0){
+				errors.rejectValue("categoryImg",
+						"add.banner.image.category.not.selected");
+				addBannerForm.setCategoryImg(new BigDecimal(1));
+				imageCategoryFlag = 1;
+			}
+			
+			if(addBannerForm.getProductImg2().toString().equals("0") && imageProductFlag == 0){
+				errors.rejectValue("productImg",
+						"add.banner.image.product.not.selected");
+				imageProductFlag = 1;
+			}
+		}
+		
+		//Image3
+		if(!addBannerForm.getProdImgPath3().isEmpty()){
+			if(addBannerForm.getCategoryImg3().toString().equals("0") && imageCategoryFlag == 0){
+				errors.rejectValue("categoryImg",
+						"add.banner.image.category.not.selected");
+				addBannerForm.setCategoryImg(new BigDecimal(1));
+				imageCategoryFlag = 1;
+			}
+			
+			if(addBannerForm.getProductImg3().toString().equals("0") && imageProductFlag == 0){
+				errors.rejectValue("productImg",
+						"add.banner.image.product.not.selected");
+				imageProductFlag = 1;
+			}
+		}
+		
+		
+		//Image4
+		if(!addBannerForm.getProdImgPath4().isEmpty()){
+			if(addBannerForm.getCategoryImg4().toString().equals("0") && imageCategoryFlag == 0){
+				errors.rejectValue("categoryImg",
+						"add.banner.image.category.not.selected");
+				addBannerForm.setCategoryImg(new BigDecimal(1));
+				imageCategoryFlag = 1;
+			}
+			
+			if(addBannerForm.getProductImg4().toString().equals("0") && imageProductFlag == 0){
+				errors.rejectValue("productImg",
+						"add.banner.image.product.not.selected");
+				imageProductFlag = 1;
+			}
+		}
+		
+		//Image5
+		if(!addBannerForm.getProdImgPath5().isEmpty()){
+			if(addBannerForm.getCategoryImg5().toString().equals("0") && imageCategoryFlag == 0){
+				errors.rejectValue("categoryImg",
+						"add.banner.image.category.not.selected");
+				addBannerForm.setCategoryImg(new BigDecimal(1));
+				imageCategoryFlag = 1;
+			}
+			
+			if(addBannerForm.getProductImg5().toString().equals("0") && imageProductFlag == 0){
+				errors.rejectValue("productImg",
+						"add.banner.image.product.not.selected");
+				imageProductFlag = 1;
+			}
+		}
+		
+		//==========Banner Time Validation==========
+		
+		//If Category is selected
+		SimpleDateFormat sdf = new SimpleDateFormat(SBSConstants.DATE_MM_DD_YYYY_TIME);
+		Date to_date = null, from_date=null;
+		List<BannerTbMaster> bannerTbMasters = null;
+		try {
+			from_date = sdf.parse(addBannerForm.getFromDate());
+			to_date = sdf.parse(addBannerForm.getToDate());
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		HashMap<String, Object> properties = new HashMap<>();
+		properties.put("isDltd", new BigDecimal(0));
+		properties.put("vcStts", SBSConstants.BANNER_STATUS.Active.toString());
+		
+		if(addBannerForm.getBannerApplyTo().equals("C")){
+			properties.put("chAply", "C");
+			bannerTbMasters = bannerService.findAllByProperty(properties);
+		}
+		else{
+			properties.put("chAply", "P");
+			bannerTbMasters = bannerService.findAllByProperty(properties);
+		}
+			
+		//Check for category
+		if(addBannerForm.getBannerApplyTo().equals("C")){
+			//Loop to check the Overlapping time span in case of All Category
+			long bannerCategoryId;
+				//Loop to check the Overlapping time span in case of a specific category ID
+				for (BannerTbMaster bannerTbMaster : bannerTbMasters) {
+					bannerCategoryId = bannerTbMaster.getCategoryTbMaster() == null ? 0 : bannerTbMaster.getCategoryTbMaster().getNmCtgryId();
+					if(String.valueOf(bannerCategoryId).equals(addBannerForm.getBannerCategoryId())){
+						//Check Time
+						if(addBannerForm.getMode().equals("Add")) {
+							if(isOverlapping(bannerTbMaster.getDtBnrActvtdFrm().getTime(), bannerTbMaster.getDtBnrActvtdTo().getTime(), 
+									from_date, to_date)){
+								errors.rejectValue("fromDate",
+										"add.banner.DateTime.overlap.same.category");
+								break;
+							}
+						}
+						if(addBannerForm.getMode().equals("Update")) {
+							if(isOverlapping(bannerTbMaster.getDtBnrActvtdFrm().getTime(), bannerTbMaster.getDtBnrActvtdTo().getTime(), 
+									from_date, to_date) && bannerTbMaster.getNmBnrId() != addBannerForm.getBannerId()){
+								errors.rejectValue("fromDate",
+										"add.banner.DateTime.overlap.same.category");
+								break;
+							}
+						}
+					}
+				}
+			//}
+		}
+		
+		
+		//Check for Page Location
+		if(addBannerForm.getBannerApplyTo().equals("P")){
+			//Loop to check the Overlapping time span
+			for (BannerTbMaster bannerTbMaster : bannerTbMasters) {
+				if(bannerTbMaster.getVcBnrPg().equals(addBannerForm.getBannerPageName()) && 
+						bannerTbMaster.getVcPgPstn().equals(addBannerForm.getBannerPagePositionName())){
+					//Check Time
+					if(addBannerForm.getMode().equals("Add")){
+						if(isOverlapping(bannerTbMaster.getDtBnrActvtdFrm().getTime(), bannerTbMaster.getDtBnrActvtdTo().getTime(), 
+								from_date, to_date) ){
+							errors.rejectValue("fromDate",
+									"add.banner.DateTime.overlap.same.page.location"/*,
+									"Banner Time span is overlapping for page location"*/);
+							break;
+						}
+					}
+					
+					if(addBannerForm.getMode().equals("Update")){
+						if(isOverlapping(bannerTbMaster.getDtBnrActvtdFrm().getTime(), bannerTbMaster.getDtBnrActvtdTo().getTime(), 
+								from_date, to_date) && bannerTbMaster.getNmBnrId() != addBannerForm.getBannerId()){
+							errors.rejectValue("fromDate",
+									"add.banner.DateTime.overlap.same.page.location"/*,
+									"Banner Time span is overlapping for page location"*/);
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		//Check for Number of Images
+		
+		if(addBannerForm.getProdImgPath1().isEmpty() &&
+				addBannerForm.getProdImgPath2().isEmpty() &&
+					addBannerForm.getProdImgPath3().isEmpty() &&
+						addBannerForm.getProdImgPath4().isEmpty() &&
+							addBannerForm.getProdImgPath5().isEmpty() ){
+			errors.rejectValue("noImageError",
+					"add.banner.no.image.error"/*,
+					"Please Upload minimum one image"*/);
+		}
+		
+		
+	
+	}
+	
+	public boolean validatePattern(final String input, String pattern) {
+		return Pattern.compile(pattern).matcher(input).matches();
+
+	}	
+	
+	public static boolean isOverlapping(Date start1, Date end1, Date start2, Date end2) {
+		if(start1 != null && start2 != null && end1 != null && end2 != null)
+			return start1.before(end2) && start2.before(end1);
+		else
+			return false;
+	}
+
+}

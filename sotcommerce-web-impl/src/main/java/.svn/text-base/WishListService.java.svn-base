@@ -1,0 +1,61 @@
+package com.sbsc.fos.wishlist.service;
+
+import java.text.ParseException;
+import java.util.List;
+import java.util.Map;
+
+import com.sbsc.fos.common.vo.SessionInfo;
+import com.sbsc.fos.exception.BusinessFailureException;
+import com.sbsc.fos.persistance.WishlistTbDtl;
+import com.sbsc.fos.wishlist.common.WishListVO;
+
+public interface WishListService {
+	
+	/**
+	 * Service to Find all Wish List 
+	 * 
+	 * @return
+	 * @throws ParseException
+	 */
+	public List<WishListVO> findWishList()  throws ParseException ;
+	
+	
+	/**
+	 *  Service to Find all Wish List on basis of Session info
+	 * 
+	 * @param sessionInfo
+	 * @return
+	 * @throws ParseException
+	 */
+	public List<WishListVO> findWishListByID(SessionInfo sessionInfo)  throws ParseException;
+	
+	/**
+	 * 
+	 * Service to Delete a Wish from Wish List on basis of ID
+	 * 
+	 * @param wishId
+	 * @param sessionInfo
+	 * @return
+	 * @throws BusinessFailureException
+	 * @throws ParseException
+	 */
+	public List<WishListVO> deleteById(final long wishId,SessionInfo sessionInfo) throws BusinessFailureException ,ParseException;
+	
+	/**
+	 * Service Filters the Wish List on basis of filters
+	 * 
+	 * 
+	 * @param filter_criteria
+	 * @param sessionInfo
+	 * @return
+	 * @throws ParseException
+	 */
+	public List<WishListVO>  findAllWishListByFilters(Map<String, Object> filter_criteria, SessionInfo sessionInfo) throws Exception;
+
+	
+	
+	public long findProductByWishID(long wishID);
+	
+	public boolean addWishList(Map prodAndVaraintIds ,SessionInfo sessionInfo);
+}
+

@@ -1,0 +1,489 @@
+package com.sot.ecommerce.handler;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.stereotype.Component;
+
+import com.sbsc.fos.common.vo.SessionInfo;
+import com.sbsc.fos.customersupport.form.CustomerSupportForm;
+import com.sbsc.fos.customersupport.service.CustomerSupportIssueReason;
+import com.sbsc.fos.customersupport.service.CustomerSupportService;
+import com.sbsc.fos.order.service.OrderService;
+import com.sbsc.fos.persistance.CustomerSupport;
+import com.sbsc.fos.persistance.IssueReasonTbMaster;
+import com.sbsc.fos.persistance.OrderTbMaster;
+import com.sbsc.fos.persistance.UmTbUser;
+import com.sbsc.fos.persistance.UmTbUserRole;
+import com.sbsc.fos.um.service.StoreService;
+import com.sbsc.fos.um.service.UserRoleService;
+import com.sbsc.fos.um.service.UserService;
+import com.sbsc.fos.utils.DateUtil;
+import com.sbsc.fos.utils.SBSConstants;
+import com.sbsc.fos.utils.UniqueIdGenerator;
+
+@Component
+public class CustomerSupportHandler implements SBSConstants {
+	private long usrID;
+
+	private long storeID;
+	@Autowired
+	CustomerSupportService customerSupportService;
+	@Autowired
+	CustomerSupportIssueReason customerSupportIssueReason;
+	@Autowired
+	OrderService orderService;
+    @Autowired
+    UserRoleService userRoleService;
+	
+
+	@Autowired
+	UserService userService;
+	@Autowired
+	StoreService storeService;
+	@Autowired
+	private MessageSource messageSource;
+	private static final Logger logger = Logger
+			.getLogger(CustomerSupportHandler.class);
+
+	public StoreService getStoreService() {
+		return storeService;
+	}
+	public UserRoleService getUserRoleService() {
+		return userRoleService;
+	}
+
+	public void setUserRoleService(UserRoleService userRoleService) {
+		this.userRoleService = userRoleService;
+	}
+	public void setStoreService(StoreService storeService) {
+		this.storeService = storeService;
+	}
+
+	public OrderService getOrderService() {
+		return orderService;
+	}
+
+	public void setOrderService(OrderService orderService) {
+		this.orderService = orderService;
+	}
+
+	public CustomerSupportService getCustomerSupportService() {
+		return customerSupportService;
+	}
+
+	public void setCustomerSupportService(
+			CustomerSupportService customerSupportService) {
+		this.customerSupportService = customerSupportService;
+	}
+
+	public String saveCustomerQueryWithLogin(
+			CustomerSupportForm customerSupportForm, long storeId)
+			throws ParseException {
+		String message = "";
+		CustomerSupport customerSupport = new CustomerSupport();
+		customerSupport.setVcFrstNm(customerSupportForm.getFirstname());
+		customerSupport.setVcLstNm(customerSupportForm.getLastname());
+		customerSupport.setVcEml(customerSupportForm.getEmailaddress());
+		
+		String email=getValidateEmailAddressc(customerSupportForm.getEmailaddress())	;
+		if(email!=null){
+			Long userId=getUserIdfromEmail(customerSupportForm.getEmailaddress());
+			customerSupport.setNmUsrId(userId);
+		}
+		
+		if(customerSupportForm.getOrderNumber()!=""){
+		customerSupport.setNmOrdrNumber(customerSupportForm.getOrderNumber());
+		Long userId=getUserIdfromEmail(customerSupportForm.getEmailaddress());
+		customerSupport.setNmUsrId(userId);
+		}
+		customerSupport.setVcPhn(customerSupportForm.getPhonenumber());
+		customerSupport.setVcQstn(customerSupportForm.getQuestion());
+		
+		customerSupport.setVcStts(SBSConstants.CUSTOMER_SUPPORT_STATUS.Pending
+				.name());
+		// Date date=DateUtil.getCurrentDateTime();
+		customerSupport.setDtCrtdAt(DateUtil.getCurrentDateTime().getTime());
+		customerSupport.setNmStrId(storeId);
+		List<IssueReason> issueReasonTbMaster = customerSupportIssueReason
+				.findAllByProperty("vcIssRsnNm",
+						customerSupportForm.getIssueStatus());
+		customerSupport.setIssueReason(issueReasonTbMaster.get(0)
+				.getNmIssRsnId());
+		customerSupport.setIsDltd(0L);
+		customerSupport.setNmCrtdBy(0L);
+		customerSupport.setDtUpdtdAt(DateUtil.getCurrentDateTime().getTime());
+		customerSupport.setNmUpdtdBy(0L);
+		customerSupportService.saveCustomerQuery(customerSupport);
+		String reqnumber = UniqueIdGenerator.getNextId(
+				SBSConstants.Servicesseq, storeId,
+				customerSupport.getNmCstSpprtId());
+		customerSupport.setVcRqstNmbr(reqnumber);
+		customerSupportService.updateCustomerSupport(customerSupport);
+
+		message = "Your request no: " + reqnumber
+				+ " has been raised successfully. We will contact you  soon.";
+
+		return message;
+
+	}
+
+	public String saveCustomerQuery(CustomerSupportForm customerSupportForm,
+			SessionInfo sessionInfo) throws ParseException {
+		String message = "";
+
+		CustomerSupport customerSupport = new CustomerSupport();
+		customerSupport.setVcFrstNm(customerSupportForm.getFirstname());
+		customerSupport.setVcLstNm(customerSupportForm.getLastname());
+		customerSupport.setVcEml(customerSupportForm.getEmailaddress());
+
+		customerSupport.setNmOrdrNumber(customerSupportForm.getOrderNumber());
+		customerSupport.setVcPhn(customerSupportForm.getPhonenumber());
+		customerSupport.setVcQstn(customerSupportForm.getQuestion());
+
+		customerSupport.setVcStts(SBSConstants.CUSTOMER_SUPPORT_STATUS.Pending
+				.name());
+		customerSupport.setDtCrtdAt(new Date());
+		customerSupport.setNmStrId(sessionInfo.getStoreId());
+		customerSupport.setNmUsrId(sessionInfo.getUserId());
+		List<IssueReason> issueReasonTbMaster = customerSupportIssueReason
+				.findAllByProperty("vcIssRsnNm",
+						customerSupportForm.getIssueStatus());
+		customerSupport.setIssueReason(issueReasonTbMaster.get(0)
+				.getNmIssRsnId());
+		customerSupport.setIsDltd(0L);
+		customerSupport.setNmCrtdBy(sessionInfo.getUserId());
+		customerSupport.setDtUpdtdAt(DateUtil.getCurrentDateTime().getTime());
+		customerSupport.setNmUpdtdBy(sessionInfo.getUserId());
+		customerSupportService.saveCustomerQuery(customerSupport);
+		String reqnumber = UniqueIdGenerator.getNextId(
+				SBSConstants.Servicesseq, sessionInfo.getStoreId(),
+				customerSupport.getNmCstSpprtId());
+		customerSupport.setVcRqstNmbr(reqnumber);
+		customerSupportService.updateCustomerSupport(customerSupport);
+
+		message = "Your request no: " + reqnumber
+				+ " has been raised successfully. We will contact you  soon.";
+
+		return message;
+
+	}
+
+	public List<CustomerSupportForm> findIssuesByUserId(
+			List<CustomerSupportForm> customerissueslist,
+			SessionInfo sessioninfo) throws ParseException {
+
+		HashMap<String, Object> propertiesMap = new HashMap<String, Object>();
+		propertiesMap.put("nmStrId", sessioninfo.getStoreId());
+		propertiesMap.put("nmUsrId", sessioninfo.getUserId());
+		propertiesMap.put("desc", "dtCrtdAt");
+
+		List<CustomerSupport> customerissuesbolist = customerSupportService
+				.findAllByPropertyMap(propertiesMap);
+		if (null != customerissuesbolist && customerissuesbolist.size() > 0) {
+			for (CustomerSupport custsupp : customerissuesbolist) {
+				if (custsupp.getIsDltd() == 0L) {
+					CustomerSupportForm custForm = new CustomerSupportForm();
+					custForm.setNmCstSpprtId(custsupp.getNmCstSpprtId());
+					custForm.setFirstname(custsupp.getVcFrstNm());
+					custForm.setLastname(custsupp.getVcLstNm());
+					custForm.setEmailaddress(custsupp.getVcEml());
+					custForm.setOrderNumber(custsupp.getNmOrdrNumber());
+					custForm.setPhonenumber(custsupp.getVcPhn());
+					long reasonid = custsupp.getIssueReason();
+					IssueReason issueReasonTbMaster = customerSupportIssueReason
+							.findById("nmIssRsnId", reasonid);
+					custForm.setIssueStatus(issueReasonTbMaster.getVcIssRsnNm());
+					custForm.setQuestion(custsupp.getVcQstn());
+					
+				
+					custForm.setResponse(custsupp.getVcRspns());
+					custForm.setRequestnumber(custsupp.getVcRqstNmbr());
+					custForm.setStatus(custsupp.getVcStts());
+
+					custForm.setLastname(custsupp.getVcLstNm());
+					SimpleDateFormat db_date_format = new SimpleDateFormat(
+							"yyyy-MM-dd");
+					SimpleDateFormat view_date_format = new SimpleDateFormat(
+							"MM-dd-yyyy");
+					;
+					Date formatdate = db_date_format.parse(custsupp
+							.getDtCrtdAt().toString());
+					custForm.setCreatedDate(view_date_format.format(formatdate));
+					customerissueslist.add(custForm);
+				}
+			}
+			return customerissueslist;
+		} else {
+			return null;
+		}
+	}
+
+	public List<String> findAllissues() {
+		List<String> issueReason = new ArrayList<>();
+		List<IssueReason> issueslist = customerSupportIssueReason
+				.IssueFindAll();
+		for (IssueReason reason : issueslist) {
+			issueReason.add(reason.getVcIssRsnNm());
+		}
+		return issueReason;
+	}
+
+	public String deleteRequest(String requestnumber, SessionInfo sessionInfo) {
+		long reqno = Long.parseLong(requestnumber);
+		CustomerSupport custsupp = customerSupportService.findbyId(reqno);
+		custsupp.setIsDltd(1L);
+		customerSupportService.updateCustomerSupport(custsupp);
+		String message = messageSource.getMessage(
+				"customersupport.delete.response", null, null);
+		return message;
+	}
+
+	public CustomerSupportForm findById(
+			CustomerSupportForm customerSupportform, Long reqno) {
+		CustomerSupport custsupp = customerSupportService.findbyId(reqno);
+		customerSupportform.setNmCstSpprtId(custsupp.getNmCstSpprtId());
+		customerSupportform.setFirstname(custsupp.getVcFrstNm());
+		customerSupportform.setLastname(custsupp.getVcLstNm());
+		customerSupportform.setEmailaddress(custsupp.getVcEml());
+		customerSupportform.setOrderNumber(custsupp.getNmOrdrNumber());
+		customerSupportform.setQuestion(custsupp.getVcQstn());
+		customerSupportform.setPhonenumber(custsupp.getVcPhn());
+		customerSupportform.setResponse(custsupp.getVcRspns());
+		customerSupportform.setRequestnumber(custsupp.getVcRqstNmbr());
+		System.out.println("value::::" + custsupp.getIssueReason());
+		List<IssueReason> issueReasonTbMaster = customerSupportIssueReason
+				.findAllByProperty("nmIssRsnId", custsupp.getIssueReason());
+		System.out.println("value:::::::"
+				+ issueReasonTbMaster.get(0).getVcIssRsnNm());
+		customerSupportform.setIssueStatus(issueReasonTbMaster.get(0)
+				.getVcIssRsnNm());
+		customerSupportform.setLastname(custsupp.getVcLstNm());
+		customerSupportform.setStatus(custsupp.getVcStts());
+		return customerSupportform;
+	}
+
+	public String updateCustomerQuery(CustomerSupportForm customerSupportForm,
+			long req_no, SessionInfo sessioninfo) {
+		String message = "";
+
+		CustomerSupport customerSupport = customerSupportService
+				.findbyId(req_no);
+		customerSupport.setNmCstSpprtId(req_no);
+		customerSupport.setVcFrstNm(customerSupportForm.getFirstname());
+		customerSupport.setVcLstNm(customerSupportForm.getLastname());
+		customerSupport.setVcEml(customerSupportForm.getEmailaddress());
+
+		customerSupport.setNmOrdrNumber(customerSupportForm.getOrderNumber());
+		customerSupport.setVcPhn(customerSupportForm.getPhonenumber());
+		customerSupport.setVcQstn(customerSupportForm.getQuestion());
+		customerSupport.setVcStts("P");
+		customerSupport.setDtCrtdAt(new Date());
+		customerSupport.setNmStrId(sessioninfo.getStoreId());
+		List<IssueReason> issueReasonTbMaster = customerSupportIssueReason
+				.findAllByProperty("vcIssRsnNm",
+						customerSupportForm.getIssueStatus());
+		customerSupport.setIssueReason(issueReasonTbMaster.get(0)
+				.getNmIssRsnId());
+		customerSupport.setNmCrtdBy(sessioninfo.getUserId());
+		customerSupport.setDtUpdtdAt(new Date());
+		customerSupport.setNmUpdtdBy(sessioninfo.getUserId());
+		String reqnumber = UniqueIdGenerator.getNextId(
+				SBSConstants.Servicesseq, sessioninfo.getStoreId(),
+				customerSupport.getNmCstSpprtId());
+		customerSupport.setVcRqstNmbr(reqnumber);
+		customerSupportService.updateCustomerSupport(customerSupport);
+
+		message = messageSource.getMessage("customersupport.emailaddress.valid",
+				null, null);
+
+		return message;
+	}
+
+	public String getOrderNumber(CustomerSupportForm customersupportform) {
+		String ordernumber = "";
+		String message = "";
+
+		List<UmTbUser> umTbUserlist = new ArrayList<UmTbUser>();
+		String emailaddress = getValidateEmailAddressc(customersupportform
+				.getEmailaddress());
+		if (emailaddress != null) {
+
+			umTbUserlist = userService.findAllByProperty("vcEml", emailaddress);
+			Map<String, Object> orderMap = new HashMap<String, Object>();
+			orderMap.put("umTbUser", umTbUserlist.get(0));
+			orderMap.put("vcOrdrNmbr", customersupportform.getOrderNumber());
+			List<OrderTbMaster> orderList = orderService
+					.findOrdersbyProperties(orderMap);
+			if (orderList.size() > 0) {
+				ordernumber = orderList.get(0).getVcOrdrNmbr();
+			}
+			return ordernumber;
+		} else {
+			message =  messageSource.getMessage("customersupport.updated.response",
+					null, null);
+			return message;
+		}
+	}
+
+	public List<CustomerSupportForm> findAllforAdmin(
+			List<CustomerSupportForm> customerissueslist,
+			SessionInfo sessionInfo) throws ParseException {
+
+		HashMap<String, Object> propertiesMap = new HashMap<String, Object>();
+		propertiesMap.put("nmStrId", sessionInfo.getStoreId());
+		propertiesMap.put("desc", "dtCrtdAt");
+		List<CustomerSupport> customerissuesbolist = customerSupportService
+				.findAllByPropertyMap(propertiesMap);
+		if (null != customerissuesbolist && customerissuesbolist.size() > 0) {
+			for (CustomerSupport custsupp : customerissuesbolist) {
+				if (custsupp.getIsDltd() == 0L) {
+					CustomerSupportForm custForm = new CustomerSupportForm();
+					custForm.setNmCstSpprtId(custsupp.getNmCstSpprtId());
+					custForm.setFirstname(custsupp.getVcFrstNm());
+					custForm.setLastname(custsupp.getVcLstNm());
+					custForm.setEmailaddress(custsupp.getVcEml());
+					custForm.setOrderNumber(custsupp.getNmOrdrNumber());
+					custForm.setPhonenumber(custsupp.getVcPhn());
+					long reasonid = custsupp.getIssueReason();
+					List<IssueReason> issueReasonTbMaster = customerSupportIssueReason
+							.findAllByProperty("nmIssRsnId", reasonid);
+					custForm.setIssueStatus(issueReasonTbMaster.get(0)
+							.getVcIssRsnNm());
+					custForm.setQuestion(custsupp.getVcQstn());
+					custForm.setResponse(custsupp.getVcRspns());
+					custForm.setRequestnumber(custsupp.getVcRqstNmbr());
+					custForm.setStatus(custsupp.getVcStts());
+					custForm.setLastname(custsupp.getVcLstNm());
+
+					SimpleDateFormat db_date_format = new SimpleDateFormat(
+							"yyyy-MM-dd");
+					SimpleDateFormat view_date_format = new SimpleDateFormat(
+							"MM-dd-yyyy");
+					;
+					Date formatdate = db_date_format.parse(custsupp
+							.getDtCrtdAt().toString());
+					logger.info("format date:::::" + formatdate);
+					custForm.setCreatedDate(view_date_format.format(formatdate));
+					customerissueslist.add(custForm);
+				}
+			}
+			return customerissueslist;
+		} else {
+			return null;
+		}
+	}
+
+	public String adminupdateCustomerQuery(
+			CustomerSupportForm customerSupportForm, long req_no,
+			SessionInfo sessioninfo) {
+		String message = "";
+		CustomerSupport customerSupport = customerSupportService
+				.findbyId(req_no);
+		customerSupport.setNmCstSpprtId(req_no);
+		customerSupport.setVcStts(SBSConstants.CUSTOMER_SUPPORT_STATUS.Answered
+				.name());
+		customerSupport.setDtUpdtdAt(new Date());
+		customerSupport.setVcRspns(customerSupportForm.getResponse());
+		customerSupportService.updateCustomerSupport(customerSupport);
+		message = messageSource.getMessage("customersupport.updated.response",
+				null, null);
+
+		return message;
+	}
+
+	public List<CustomerSupportForm> findAllQueriesByFilters(
+			List<CustomerSupportForm> customerissueslist,
+			Map<String, Object> filter_criteria, SessionInfo sessionInfo )
+			throws ParseException {
+
+		 usrID = sessionInfo.getUserId();
+	     System.out.println("user id:::::"+usrID);
+	     
+	     String roleName=sessionInfo.getRoleName();
+		System.out.println("roleName::::"+roleName);
+		storeID = sessionInfo.getStoreId();
+		filter_criteria.put("filter.CustomerSupport.nmStrId", storeID);
+		if(roleName.equalsIgnoreCase("Buyer")){
+		filter_criteria.put("filter.CustomerSupport.nmUsrId", usrID);
+		}
+		
+		
+
+		// Add desc and asc in key and the pojo field in value to get filtered
+		// result in sorted order.
+		filter_criteria.put("desc", "dtCrtdAt");
+
+		List<CustomerSupport> customerissuesbolist = customerSupportService
+				.findAllCustomerQueriesByFilters(filter_criteria);
+		if (null != customerissuesbolist && customerissuesbolist.size() > 0) {
+			for (CustomerSupport custsupp : customerissuesbolist) {
+				if (custsupp.getIsDltd() == 0L) {
+					CustomerSupportForm custForm = new CustomerSupportForm();
+					custForm.setNmCstSpprtId(custsupp.getNmCstSpprtId());
+					custForm.setFirstname(custsupp.getVcFrstNm());
+					custForm.setLastname(custsupp.getVcLstNm());
+					custForm.setEmailaddress(custsupp.getVcEml());
+					custForm.setOrderNumber(custsupp.getNmOrdrNumber());
+					custForm.setPhonenumber(custsupp.getVcPhn());
+					long reasonid = custsupp.getIssueReason();
+					List<IssueReason> issueReasonTbMaster = customerSupportIssueReason
+							.findAllByProperty("nmIssRsnId", reasonid);
+					custForm.setIssueStatus(issueReasonTbMaster.get(0)
+							.getVcIssRsnNm());
+					custForm.setQuestion(custsupp.getVcQstn());
+					
+					custForm.setResponse(custsupp.getVcRspns());
+					custForm.setRequestnumber(custsupp.getVcRqstNmbr());
+					custForm.setStatus(custsupp.getVcStts());
+					SimpleDateFormat db_date_format = new SimpleDateFormat(
+							"yyyy-MM-dd");
+					SimpleDateFormat view_date_format = new SimpleDateFormat(
+							"MM-dd-yyyy");
+
+					Date formatdate = db_date_format.parse(custsupp
+							.getDtCrtdAt().toString());
+					System.out.println("format date:::::" + formatdate);
+					custForm.setCreatedDate(view_date_format.format(formatdate));
+					customerissueslist.add(custForm);
+				}
+			}
+			return customerissueslist;
+		}
+		return null;
+
+	}
+
+	public String getValidateEmailAddressc(String emailaddress) {
+		List<UmTbUser> umTbUserlist = new ArrayList<UmTbUser>();
+		umTbUserlist = userService.findAllByProperty("vcEml", emailaddress);
+		if (umTbUserlist.size() > 0) {
+			return umTbUserlist.get(0).getVcEml();
+		}
+		return null;
+	}
+	
+	public Long getUserIdfromEmail(String emailaddress) {
+		List<UmTbUser> umTbUserlist = new ArrayList<UmTbUser>();
+		umTbUserlist = userService.findAllByProperty("vcEml", emailaddress);
+		if (umTbUserlist.size() > 0) {
+			return umTbUserlist.get(0).getNmUsrId();
+		}
+		return null;
+	}
+
+	public String getEmailforUserId(long userId) {
+		UmTbUser umTbUser = new UmTbUser();
+		umTbUser = userService.findByID(userId);
+		return umTbUser.getVcEml();
+
+	}
+}

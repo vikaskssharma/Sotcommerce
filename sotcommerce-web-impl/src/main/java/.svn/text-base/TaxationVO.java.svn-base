@@ -1,0 +1,47 @@
+package com.sbsc.fos.taxation.commons;
+
+
+public class TaxationVO {
+	
+	private String categoryId;
+	
+	private String countryId;
+	
+	private String countryName;
+	
+	private String countryTax;
+
+	public String getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(String categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public String getCountryId() {
+		return countryId;
+	}
+
+	public void setCountryId(String countryId) {
+		this.countryId = countryId;
+	}
+
+	public String getCountryName() {
+		return countryName;
+	}
+
+	public void setCountryName(String countryName) {
+		this.countryName = countryName;
+	}
+
+	public String getCountryTax() {
+		return countryTax;
+	}
+
+	public void setCountryTax(String countryTax) {
+		this.countryTax = countryTax;
+	}
+	
+	
+}

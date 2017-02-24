@@ -1,0 +1,248 @@
+/**
+ * (c) R Systems International Ltd.
+ */
+package com.sot.ecommerce.handler;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.sbsc.fos.category.commons.CategoryPlaceHolderTreeVO;
+import com.sbsc.fos.category.commons.CategoryVO;
+import com.sbsc.fos.category.commons.SectionVO;
+import com.sbsc.fos.category.service.AttributeService;
+import com.sbsc.fos.category.service.CategoryService;
+import com.sbsc.fos.category.service.SectionService;
+import com.sbsc.fos.category.web.form.AddCategoryForm;
+import com.sbsc.fos.common.vo.SessionInfo;
+import com.sbsc.fos.persistance.CategoryTbMaster;
+import com.sbsc.fos.persistance.CtgrySctnTbDtl;
+import com.sbsc.fos.persistance.StoreTbMaster;
+import com.sbsc.fos.utils.DateUtil;
+
+/**
+ * The Handler is class which is a bridge between the Web tier and Service tier.
+ * This class handles all the communication between CategoryController to it's
+ * Service layer
+ * 
+ * @author simanchal.patra
+ */
+@Component
+public class CategoryHandler {
+
+	@Autowired
+	private AttributeService attributeService;
+
+	@Autowired
+	private SectionService sectionService;
+
+	@Autowired
+	private CategoryService categoryService;
+
+	private static final String CATEGORY_PATH_SEPARATOR = "/";
+
+	/**
+	 * Provides the Place Holder Categories in Hierarchical Tree format.
+	 * 
+	 * @param sessionInfo
+	 *            Session information of the user signed-in.
+	 * 
+	 * @return List of Place Holder Categories in Hierarchical order and Tree
+	 *         format.
+	 */
+	public List<CategoryPlaceHolderTreeVO> getPlaceHolderHierarchyTree(
+			SessionInfo sessionInfo) {
+
+		return categoryService.getPlaceHolderHierarchyTree(sessionInfo
+				.getStoreId());
+	}
+
+	/**
+	 * Provides all the Categories for a specific Store to which the user is
+	 * signed in.
+	 * 
+	 * @param sessionInfo
+	 *            Session information of the user signed-in.
+	 * 
+	 * @return List of CategoryVO containing the Category information (Id, Name,
+	 *         Parent Category, Status).
+	 */
+	public List<CategoryVO> getAllCategories(SessionInfo sessionInfo) {
+
+		return categoryService.getAllCategories(sessionInfo.getStoreId());
+	}
+
+	/**
+	 * Creates a new Category into the system by using the information provided.
+	 * 
+	 * @param addCategoryForm
+	 *            The Data provided by the signed-in user.
+	 * 
+	 * @param sessionInfo
+	 *            Session information of the user signed-in.
+	 * 
+	 * @return Identifier of the newly created Category.
+	 */
+	public Long createNewCategory(AddCategoryForm addCategoryForm,
+			SessionInfo sessionInfo) {
+
+		CategoryTbMaster newCategory = new CategoryTbMaster();
+
+		newCategory.setVcCtgryNm(addCategoryForm.getCategoryName().trim());
+
+		newCategory.setVcCtgryDsc(addCategoryForm.getDescription().trim());
+
+		newCategory.setDtCrtdAt(DateUtil.getCurrentDateTime());
+
+		newCategory.setNmCrtdBy(new BigDecimal(sessionInfo.getUserId()));
+
+		StoreTbMaster storeTbMaster = new StoreTbMaster();
+
+		storeTbMaster.setNmStrId(sessionInfo.getStoreId());
+		newCategory.setStoreTbMaster(storeTbMaster);
+
+		newCategory.setVcStts(addCategoryForm.getStatus());
+
+		newCategory.setIsDltd(new BigDecimal(0));
+
+		newCategory.setNmUpdtdBy(new BigDecimal(sessionInfo.getUserId()));
+
+		newCategory.setDtUpdtdAt(DateUtil.getCurrentDateTime());
+
+		Long prntCategoryId = null;
+
+		CategoryTbMaster parentCategory = null;
+
+		newCategory.setIsPlchldr(new BigDecimal(addCategoryForm
+				.getIsPlaceHolder() ? 1 : 0));
+
+		StringBuffer categoryPath = new StringBuffer(CATEGORY_PATH_SEPARATOR);
+
+		if (addCategoryForm.getParentCategoryId() != null
+				&& !addCategoryForm.getParentCategoryId().equals("NONE")) {
+
+			prntCategoryId = Long
+					.valueOf(addCategoryForm.getParentCategoryId());
+
+			parentCategory = getCategory(prntCategoryId);
+
+			newCategory.setCategoryTbMaster(parentCategory);
+
+			CategoryTbMaster cat = newCategory;
+
+			while (cat != null) {
+
+				categoryPath.insert(0,
+						CATEGORY_PATH_SEPARATOR + cat.getVcCtgryNm(), 0, cat
+								.getVcCtgryNm().length() + 1);
+
+				cat = cat.getCategoryTbMaster();
+
+			}
+
+		} else {
+			categoryPath.append(addCategoryForm.getCategoryName()).append(
+					CATEGORY_PATH_SEPARATOR);
+		}
+
+		newCategory.setVcCtgryPth(categoryPath.toString());
+
+		return categoryService.create(newCategory);
+
+	}
+
+	/**
+	 * Updates a existing Category with modified values into the System.
+	 * 
+	 * @param addCategoryForm
+	 *            Information modified by the User.
+	 * 
+	 * @param sessionInfo
+	 *            Session information of the user signed-in.
+	 */
+	public void updateCategory(AddCategoryForm addCategoryForm,
+			SessionInfo sessionInfo) {
+
+		CategoryTbMaster editedCategory = getCategory(addCategoryForm
+				.getCategoryId());
+
+		// Name update
+		editedCategory.setVcCtgryNm(addCategoryForm.getCategoryName().trim());
+
+		// Description update
+		editedCategory.setVcCtgryDsc(addCategoryForm.getDescription().trim());
+
+		// Status update
+		editedCategory.setVcStts(addCategoryForm.getStatus());
+
+		editedCategory.setNmUpdtdBy(new BigDecimal(sessionInfo.getUserId()));
+
+		editedCategory.setDtUpdtdAt(DateUtil.getCurrentDateTime());
+
+		categoryService.saveOrUpdate(editedCategory);
+	}
+
+	/**
+	 * Soft-Deletes a Category and all its child elements from the system.
+	 * 
+	 * @param categoryId
+	 *            Identifier of the Category to be deleted.
+	 */
+	public void deleteCategory(long categoryId) {
+
+		categoryService.deleteById(categoryId);
+	}
+
+	/**
+	 * Provides information about all the Sections belongs to the specified
+	 * Category.
+	 * 
+	 * @param categoryId
+	 *            Identifier of the Category whose Section information required.
+	 * 
+	 * @return List of Sections.
+	 */
+	public List<SectionVO> getAllSection(long categoryId) {
+
+		HashMap<String, Object> properties = new HashMap<String, Object>();
+
+		List<SectionVO> sectionVoList = new ArrayList<SectionVO>();
+
+		properties.put("categoryTbMaster", getCategory(categoryId));
+
+		properties.put("isDltd", new BigDecimal(0));
+
+		List<CtgrySctnTbDtl> allSectionsList = sectionService
+				.findAllByProperty(properties);
+
+		if (allSectionsList != null && !allSectionsList.isEmpty()) {
+
+			for (CtgrySctnTbDtl ctgrySctnTbDtl : allSectionsList) {
+
+				sectionVoList.add(new SectionVO(ctgrySctnTbDtl.getNmSctnId(),
+						ctgrySctnTbDtl.getVcSctnNm()));
+			}
+
+		}
+
+		return sectionVoList;
+	}
+
+	/**
+	 * Reads information about the specified Category from the System.
+	 * 
+	 * @param categoryId
+	 *            Identifier of the Category whose information needed.
+	 * 
+	 * @return The CategoryTbMaster
+	 */
+	public CategoryTbMaster getCategory(long categoryId) {
+		return categoryService.findByID(categoryId);
+	}
+
+}

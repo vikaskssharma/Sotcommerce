@@ -1,0 +1,330 @@
+/**
+ * (c) R Systems International Ltd.
+ */
+package com.sbsc.fos.category.service;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+
+import org.apache.log4j.Logger;
+import org.hibernate.HibernateException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.sbsc.fos.common.dao.GenericDAO;
+import com.sbsc.fos.common.dao.SQLDAO;
+import com.sbsc.fos.exception.BusinessFailureException;
+import com.sbsc.fos.persistance.CtgrySctnAttrTbDtl;
+import com.sbsc.fos.persistance.CtgrySctnTbDtl;
+import com.sbsc.fos.product.service.ProductService;
+
+/**
+ * This class provides the Implementation of the Services specific to class
+ * CtgrySctnTbDtl (Section) for all the tasks related to database operations
+ * like Create, Read, Update & Delete.
+ * 
+ * @author simanchal.patra
+ * 
+ */
+@Service
+public class SectionServiceImpl implements SectionService {
+
+	/** Logger instance. **/
+	private static final Logger logger = Logger
+			.getLogger(SectionServiceImpl.class);
+
+	/** The Generic DAO instantiated for CtgrySctnTbDtl */
+	private GenericDAO<CtgrySctnTbDtl> dao;
+
+	/** The SQL DAO */
+	@Autowired
+	private SQLDAO salDAO;
+
+	/** The Product Service */
+	@Autowired
+	private ProductService productService;
+
+	/** Instantiating a copy of Generic DAO for CtgrySctnTbDtl */
+	@Autowired
+	public void setDAO(GenericDAO<CtgrySctnTbDtl> daoToSet) {
+		dao = daoToSet;
+		dao.setClazz(CtgrySctnTbDtl.class);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.sbsc.fos.category.service.SectionService#create(com.sbsc.fos.persistance
+	 * .CtgrySctnTbDtl)
+	 */
+	@Override
+	@Transactional
+	public Long create(CtgrySctnTbDtl section) {
+		try {
+			return dao.create(section);
+		} catch (HibernateException hexp) {
+			logger.error(String.format(
+					"Error occured while creating a new Section with"
+							+ " name - %s for Category with Id - %s", section
+							.getVcSctnNm(), section.getCategoryTbMaster()
+							.getNmCtgryId()), hexp);
+		} finally {
+
+		}
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.sbsc.fos.category.service.SectionService#findAll()
+	 */
+	@Override
+	@Transactional
+	public List<CtgrySctnTbDtl> findAll() {
+
+		try {
+			return dao.findAll();
+		} catch (HibernateException hexp) {
+			logger.error(
+					"Error occured while Reading all Sections from System ",
+					hexp);
+		} finally {
+
+		}
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.sbsc.fos.category.service.SectionService#findByID(long)
+	 */
+	@Override
+	@Transactional
+	public CtgrySctnTbDtl findByID(long sectionId) {
+
+		try {
+			return dao.findByID(sectionId);
+		} catch (HibernateException hexp) {
+			logger.error(String.format(
+					"Error occured while reading a Section with id - %s",
+					String.valueOf(sectionId)), hexp);
+		} finally {
+
+		}
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.sbsc.fos.category.service.SectionService#findAllByProperty(java.lang
+	 * .String, java.lang.Object)
+	 */
+	@Override
+	@Transactional
+	public List<CtgrySctnTbDtl> findAllByProperty(String propertyName,
+			Object value) {
+
+		try {
+			return dao.findAllByProperty(propertyName, value);
+		} catch (HibernateException hexp) {
+			logger.error(String.format(
+					"Error occured while reading a Section having"
+							+ " property name- %s and property value - %s",
+					propertyName, value.toString()), hexp);
+		} finally {
+
+		}
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.sbsc.fos.category.service.SectionService#findAllByProperty(java.util
+	 * .HashMap)
+	 */
+	@Override
+	@Transactional
+	public List<CtgrySctnTbDtl> findAllByProperty(
+			HashMap<String, Object> propertiesMap) {
+
+		try {
+			return dao.findAllByProperty(propertiesMap);
+		} catch (HibernateException hexp) {
+			logger.error(String.format(
+					"Error occured while reading a Section having"
+							+ " properties - %s", propertiesMap.toString()),
+					hexp);
+		} finally {
+
+		}
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.sbsc.fos.category.service.SectionService#update(com.sbsc.fos.persistance
+	 * .CtgrySctnTbDtl)
+	 */
+	@Override
+	@Transactional
+	public CtgrySctnTbDtl update(CtgrySctnTbDtl section) {
+
+		try {
+			return dao.update(section);
+		} catch (HibernateException hexp) {
+			logger.error(
+					String.format(
+							"Error occured while updating a Section having"
+									+ " identifier - %s",
+							String.valueOf(section.getNmSctnId())), hexp);
+		} finally {
+
+		}
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.sbsc.fos.category.service.SectionService#delete(com.sbsc.fos.persistance
+	 * .CtgrySctnTbDtl)
+	 */
+	@Override
+	@Transactional
+	public void delete(CtgrySctnTbDtl section) throws BusinessFailureException {
+
+		try {
+			CtgrySctnTbDtl sectionToDelete = dao
+					.findByID(section.getNmSctnId());
+
+			if (productService.findAllByProperty("categoryTbMaster",
+					sectionToDelete.getCategoryTbMaster()).size() > 0) {
+
+				throw new BusinessFailureException("unable.to.delete.section");
+
+			} else {
+
+				for (CtgrySctnAttrTbDtl ctgrySctnAttrTbDtl : sectionToDelete
+						.getCtgrySctnAttrTbDtls()) {
+					ctgrySctnAttrTbDtl.setIsDltd(new BigDecimal("1"));
+				}
+
+				sectionToDelete.setIsDltd(new BigDecimal("1"));
+				dao.update(sectionToDelete);
+			}
+		} catch (HibernateException hexp) {
+			logger.error(
+					String.format(
+							"Error occured while soft-deleting a Section having"
+									+ " identifier - %s",
+							String.valueOf(section.getNmSctnId())), hexp);
+		} finally {
+
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.sbsc.fos.category.service.SectionService#deleteById(long)
+	 */
+	@Override
+	@Transactional
+	public void deleteById(long sectionId) throws BusinessFailureException {
+
+		try {
+			CtgrySctnTbDtl sectionToDelete = dao.findByID(sectionId);
+
+			HashMap<String, Object> criteria = new HashMap<>();
+			criteria.put("categoryTbMaster",
+					sectionToDelete.getCategoryTbMaster());
+			criteria.put("isDltd", new BigDecimal(0));
+
+			if (productService.findAllByProperty(criteria).size() > 0) {
+
+				throw new BusinessFailureException("unable.to.delete.section");
+
+			} else {
+
+				for (CtgrySctnAttrTbDtl ctgrySctnAttrTbDtl : sectionToDelete
+						.getCtgrySctnAttrTbDtls()) {
+					ctgrySctnAttrTbDtl.setIsDltd(new BigDecimal("1"));
+				}
+
+				sectionToDelete.setIsDltd(new BigDecimal("1"));
+				dao.update(sectionToDelete);
+			}
+		} catch (HibernateException hexp) {
+			logger.error(String.format(
+					"Error occured while soft-deleting a Section having"
+							+ " identifier - %s", String.valueOf(sectionId)),
+					hexp);
+		} finally {
+
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.sbsc.fos.category.service.SectionService#saveOrUpdate(com.sbsc.fos
+	 * .persistance.CtgrySctnTbDtl)
+	 */
+	@Transactional
+	@Override
+	public void saveOrUpdate(CtgrySctnTbDtl section) {
+
+		try {
+			dao.saveOrUpdate(section);
+		} catch (HibernateException hexp) {
+			logger.error(String.format(
+					"Error occured while saving or updating a Section having"
+							+ " name - %s for Category with Id - %s", section
+							.getVcSctnNm(), section.getCategoryTbMaster()
+							.getNmCtgryId()), hexp);
+		} finally {
+
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.sbsc.fos.category.service.SectionService#findAllNameId(java.lang.
+	 * Long)
+	 */
+	@Transactional
+	@Override
+	public HashMap<String, Long> findAllNameId(Long categoryId) {
+
+		try {
+			return salDAO.findAllSectionNameId(categoryId);
+		} catch (HibernateException hexp) {
+			logger.error(
+					String.format(
+							"Error occured while reading the Name and Id of"
+									+ " all Sections for the specified"
+									+ " Category having Id - %s",
+							String.valueOf(categoryId)), hexp);
+		} finally {
+
+		}
+
+		return null;
+	}
+
+}

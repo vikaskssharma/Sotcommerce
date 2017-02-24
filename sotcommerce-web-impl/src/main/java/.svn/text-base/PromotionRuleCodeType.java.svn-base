@@ -1,0 +1,15 @@
+package com.sbsc.fos.promotion.commons;
+
+public class PromotionRuleCodeType {
+
+	private String promotionRuleCodeType;
+
+	public String getPromotionRuleCodeType() {
+		return promotionRuleCodeType;
+	}
+
+	public void setPromotionRuleCodeType(String promotionRuleCodeType) {
+		this.promotionRuleCodeType = promotionRuleCodeType;
+	}
+
+}

@@ -1,0 +1,185 @@
+/**
+ * 
+ */
+package com.sbsc.fos.product.web.form.validator;
+
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.Errors;
+import org.springframework.validation.ValidationUtils;
+import org.springframework.validation.Validator;
+
+import com.sbsc.fos.product.web.form.ProductBasicForm;
+import com.sbsc.fos.product.web.handler.ProductHandler;
+import com.sbsc.fos.utils.SBSConstants;
+
+/**
+ * @author diksha.rattan
+ * 
+ */
+@Component
+public class ProductValidator implements Validator, SBSConstants {
+
+	private static final int PRODUCT_NAME_MAX_LENGTH = 100;
+
+	private static final int PRODUCT_NAME_MIN_LENGTH = 1;
+
+	private static final int PRODUCT_DESC_MAX_LENGTH = 1024;
+
+	private static final int PRODUCT_DESC_MIN_LENGTH = 1;
+
+	private static final String PRODUCT_NAME_PATTERN = "^[a-zA-Z0-9 -]*$";// "^[a-zA-Z0-9#& ._()%+-]*$";//
+																			// "^[A-Za-z0-9._()%+-]*$";
+
+	@Autowired
+	private ProductHandler productHandler;
+
+	@Override
+	public boolean supports(Class<?> clazz) {
+		return ProductValidator.class.isAssignableFrom(clazz);
+	}
+
+	@Override
+	public void validate(Object command, Errors errors) {
+
+		ProductBasicForm productBasicForm = (ProductBasicForm) command;
+
+		if (StringUtils.isNotBlank(productBasicForm.getProductName())) {
+
+			if (StringUtils.equalsIgnoreCase(
+					productBasicForm.getErrorMessage(), EXISTS)) {
+
+				errors.rejectValue("productName",
+						"ProductBasicForm.product.exists");
+
+			} else if (productBasicForm.getProductName().length() > PRODUCT_NAME_MAX_LENGTH) {
+				errors.rejectValue("productName",
+						"ProductBasicForm.productName.max.length");
+			} else if (productBasicForm.getProductName().length() < PRODUCT_NAME_MIN_LENGTH) {
+				errors.rejectValue("productName",
+						"ProductBasicForm.productName.min.length");
+			} else if (!this.validatePattern(productBasicForm.getProductName(),
+					PRODUCT_NAME_PATTERN)) {
+				errors.rejectValue(
+						"productName",
+						"ProductBasicForm.product.productname.format",
+						"Product name can only be alphanumeric, Spaces allowed");
+
+			}
+
+		} else {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "productName",
+					"ProductBasicForm.productName.name.blank");
+		}
+
+		if (StringUtils.isNotBlank(productBasicForm.getProductDesc())) {
+
+			if (productBasicForm.getProductDesc().length() > PRODUCT_DESC_MAX_LENGTH) {
+				errors.rejectValue("productDesc",
+						"ProductBasicForm.productDesc.max.length",
+						"Product description cannot be greater than 1024 characters");
+			} else if (productBasicForm.getProductDesc().length() < PRODUCT_DESC_MIN_LENGTH) {
+				errors.rejectValue("productDesc",
+						"ProductBasicForm.productDesc.min.length",
+						"Product description cannot be less than 1 character");
+			}
+
+		}else {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "productDesc",
+					"ProductBasicForm.ProductDesc.blank");
+		}
+
+		if (StringUtils.isBlank(productBasicForm.getStatus()) && !productBasicForm.getIsVariant()) {
+
+			errors.rejectValue("status", "ProductBasicForm.status.valid",
+					"Select status");
+		}
+
+		if (StringUtils.isNotBlank(productBasicForm.getDealPrice())) {
+
+			if (!StringUtils.isNumeric(productBasicForm.getDealPrice())) {
+
+				errors.rejectValue("dealPrice",
+						"ProductBasicForm.marketPrice.numeric",
+						"Deal Price should be numeric");
+
+			}
+		}else {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "dealPrice",
+					"ProductBasicForm.marketPrice.blank");
+		}
+
+		if (StringUtils.isNotBlank(productBasicForm.getSalePrice())) {
+
+			if (!StringUtils.isNumeric(productBasicForm.getSalePrice())) {
+
+				errors.rejectValue("salePrice",
+						"ProductBasicForm.salePrice.numeric",
+						"Maximum Sell Price should be numeric");
+
+			} else {
+
+				if (StringUtils.isNumeric(productBasicForm.getDealPrice())) {
+					long salePrice = Long.parseLong(productBasicForm
+							.getSalePrice());
+					long dealPrice = StringUtils.isBlank(productBasicForm.getDealPrice()) ? 0
+							: Long.parseLong(productBasicForm.getDealPrice());
+
+					if (dealPrice > salePrice) {
+
+						errors.rejectValue("dealPrice",
+								"ProductBasicForm.productDesc.MarketPrice",
+								"Deal Price should not be greater than Maximum Selling Price.");
+
+					}
+				}
+			}
+		}  {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "salePrice",
+					"ProductBasicForm.salePrice.blank");
+		}
+		
+		
+		if (StringUtils.isNotBlank(productBasicForm.getQuantity())) {
+
+			if (!StringUtils.isNumeric(productBasicForm.getQuantity())) {
+
+				errors.rejectValue("quantity",
+						"ProductBasicForm.quantity.numeric",
+						"Maximum Sell Price should be numeric");
+
+			} 
+		}else {
+		
+		
+			
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "quantity",
+					"ProductBasicForm.Quantity.blank");
+			
+		}
+		
+		
+		if(!productBasicForm.getIsVariantAdded() && StringUtils.equalsIgnoreCase(productBasicForm.getStatus() , PRODUCT_STATUS.Active.name()) && productBasicForm.getIsVariant()){
+			
+			errors.rejectValue("status",
+					"ProductBasicForm.product.novariantadded",
+					"Variant product can only be activated after adding at least a variant");
+		}
+		
+		
+		if(StringUtils.equalsIgnoreCase(productBasicForm.getStatus() , PRODUCT_STATUS.Active.name()) && productBasicForm.getIsAllImageDeleted()){
+			
+			errors.rejectValue("status",
+					"ProductBasicForm.product.noimageadded",
+					"Product can only be activated after adding at least a image");
+		}
+	}
+
+	public boolean validatePattern(final String input, String pattern) {
+		return Pattern.compile(pattern).matcher(input).matches();
+
+	}
+}

@@ -1,0 +1,400 @@
+package com.sot.ecommerce.service.impl;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.log4j.Logger;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.sbsc.fos.exception.BusinessFailureException;
+import com.sbsc.fos.exception.GenericFailureException;
+import com.sbsc.fos.store.web.vo.Attribute;
+import com.sbsc.fos.store.web.vo.Category;
+import com.sbsc.fos.store.web.vo.FieldStatistics;
+import com.sbsc.fos.store.web.vo.Product;
+import com.sbsc.fos.store.web.vo.ProductVariant;
+import com.sbsc.fos.store.web.vo.ProductImagableVariantData;
+import com.sbsc.fos.store.web.vo.Review;
+import com.sbsc.fos.store.web.vo.Section;
+
+/**
+ * @author simanchal.patra
+ */
+@Service
+public class StoreServiceImpl implements StoreService {
+
+	private static final Logger logger = Logger
+			.getLogger(StoreServiceImpl.class);
+
+	@Autowired
+	ProductSolrService productSolrService;
+
+	@Autowired
+	CategorySolrService categorySolrService;
+
+	@Autowired
+	SectionSolrService sectionSolrService;
+
+	@Autowired
+	AttributeSolrService attributeSolrService;
+
+	@Autowired
+	ProductVariantSolrService productVariantSolrService;
+
+	@Autowired
+	ReviewsSolrService reviewSolrService;
+
+	@Override
+	public Product getProduct(Long productId, Long variantId)
+			throws SolrServerException, MalformedURLException {
+
+		return productSolrService.getProduct(productId, variantId);
+	}
+
+	@Override
+	public List<Product> getAllProducts() throws SolrServerException {
+
+		return productSolrService.getAllProducts();
+	}
+
+	/*
+	 * 
+	 * Get Home Page menu
+	 */
+	@Override
+	public List<Category> getAllCategories() throws SolrServerException,
+			MalformedURLException {
+
+		return categorySolrService.getAllCategories();
+
+	}
+
+	@Override
+	public List<Category> getAllCategoriesInCategoryPath(Long categoryId)
+			throws SolrServerException, MalformedURLException {
+
+		return categorySolrService.getPrentCategories(categoryId);
+	}
+
+	@Override
+	public LinkedHashMap<Category, List<Product>> searchProducts(
+			Long categoryId, String searchTerm)
+			throws BusinessFailureException, GenericFailureException,
+			MalformedURLException, SolrServerException {
+
+		return productSolrService.getProductsOverSearchTerm(categoryId,
+				searchTerm);
+	}
+
+	@Override
+	public List<Category> getLeftMenuCategoryTree(Long categoryId)
+			throws MalformedURLException, SolrServerException {
+
+		List<Category> leftMenuCategoryTree = new ArrayList<>();
+
+		List<Category> relatedCategoriesList = new ArrayList<>();
+
+		List<Category> childCategoriesList = new ArrayList<>();
+
+		List<Category> parentCategoriesList = null;
+
+		List<Product> productList = null;
+
+		if (categoryId != 0L) {
+
+			parentCategoriesList = categorySolrService
+					.getPrentCategories(categoryId);
+
+			if (parentCategoriesList.size() > 0) {
+
+				leftMenuCategoryTree.addAll(parentCategoriesList);
+
+				relatedCategoriesList.addAll(parentCategoriesList);
+			}
+
+			childCategoriesList = categorySolrService
+					.getImmidiateChildCategories(categoryId);
+
+			if (childCategoriesList.size() > 0) {
+
+				leftMenuCategoryTree.addAll(childCategoriesList);
+
+				relatedCategoriesList.addAll(categorySolrService
+						.getChildCategories(categoryId));
+			}
+
+		} else {
+
+			try {
+
+				leftMenuCategoryTree.addAll(getAllCategories());
+
+				relatedCategoriesList.addAll(leftMenuCategoryTree);
+
+			} catch (MalformedURLException | SolrServerException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		for (Category category : relatedCategoriesList) {
+
+			try {
+
+				productList = productSolrService
+						.getProducts(categorySolrService
+								.getPrentCategories(category.getCtgry_id()));
+
+				category.setPrdctCount(productList.size());
+
+				for (Category parentCategory : leftMenuCategoryTree) {
+
+					if ((category.getVcCtgryPth().contains(String
+							.valueOf(parentCategory.getVcCtgryNm())))
+							&& (parentCategory.getCtgry_id() != category
+									.getCtgry_id())) {
+
+						if (parentCategory.getPrdctCount() > 0) {
+
+							parentCategory.setPrdctCount(parentCategory
+									.getPrdctCount() + productList.size());
+						} else {
+							parentCategory.setPrdctCount(productList.size());
+						}
+					}
+				}
+
+			} catch (GenericFailureException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			// productsPerCategory.put(category, productList);
+		}
+
+		return leftMenuCategoryTree;
+	}
+
+	@Override
+	public List<Product> getProducts(Long selectedCategoryId)
+			throws MalformedURLException, SolrServerException {
+
+		return productSolrService.getProducts(categorySolrService
+				.getNoNPlaceHolderChildCategories(selectedCategoryId));
+	}
+
+	@Override
+	public Category getCategory(Long categoryId) {
+		return categorySolrService.getCategory(categoryId);
+	}
+
+	@Override
+	public List<Section> getAllSections(Long categoryId) {
+		return sectionSolrService.getAllSections(categoryId);
+	}
+
+	@Override
+	public List<Attribute> getAllAttributes(Long sectionId) {
+
+		return attributeSolrService.getAllAttributes(sectionId);
+	}
+
+	@Override
+	public Map<String, List<ProductImagableVariantData>> getImagableVariantData(
+			Long productId, Map<String, String> imagableVariant) {
+
+		Map<String, List<ProductImagableVariantData>> productVariants = null;
+
+		try {
+
+			productVariants = productVariantSolrService.getImagableVariantData(
+					productId, imagableVariant);
+
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return productVariants;
+
+	}
+
+	@Override
+	public Map<String, Map<String, Object>> getProductFeatures(Long productId,
+			Long vrntId) {
+
+		Product product = null;
+
+		String value = new String();
+
+		Float dblValue = null;
+
+		String untValue = null;
+
+		Map<String, String> stringAttribs = new HashMap<String, String>();
+
+		Map<String, Float> numericAttribs = new HashMap<String, Float>();
+
+		Map<String, String> numericAttribUnits = new HashMap<String, String>();
+
+		Map<String, Object> attribDetailsMap = null;
+
+		Map<String, Map<String, Object>> sectionAttribMap = new HashMap<String, Map<String, Object>>();
+
+		try {
+
+			product = getProduct(productId, vrntId);
+
+			for (Field field : Product.class.getDeclaredFields()) {
+
+				field.setAccessible(true);
+
+				if (field.getName().startsWith("VC")) {
+
+					if (field.getName().contains("UNT")) {
+
+						untValue = (String) field.get(product);
+
+						if (untValue != null) {
+
+							numericAttribUnits.put(field.getName(), untValue);
+						}
+
+					} else {
+
+						value = (String) field.get(product);
+
+						if (value != null) {
+
+							stringAttribs.put(field.getName(), value);
+						}
+					}
+
+				} else if (field.getName().startsWith("NM")) {
+
+					dblValue = (Float) field.get(product);
+
+					if (dblValue != null) {
+
+						numericAttribs.put(field.getName(), dblValue);
+					}
+				} else {
+
+				}
+
+				dblValue = null;
+
+				value = null;
+
+				untValue = null;
+			}
+
+			String val = null;
+
+			for (Section section : getAllSections(product.getPrdct_ctgry_id())) {
+
+				attribDetailsMap = new HashMap<String, Object>();
+
+				for (Attribute attribute : getAllAttributes(section
+						.getSctn_id())) {
+
+					if (attribute.getIsNmrc() == 1) {
+
+						if (numericAttribs.get(attribute.getVcAttrMppng()) != null) {
+
+							val = numericAttribs
+									.get(attribute.getVcAttrMppng()).toString();
+						}
+
+						if (numericAttribUnits
+								.get(attribute.getVcUntTypMppng()) != null) {
+
+							val = val
+									+ "&nbsp;"
+									+ numericAttribUnits.get(attribute
+											.getVcUntTypMppng());
+						}
+					} else {
+
+						val = stringAttribs.get(attribute.getVcAttrMppng());
+					}
+
+					if (val != null) {
+
+						attribDetailsMap.put(attribute.getVcAttrNm(), val);
+					}
+
+				}
+
+				sectionAttribMap.put(section.getVcSctnNm(), attribDetailsMap);
+			}
+
+		} catch (MalformedURLException | SolrServerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return sectionAttribMap;
+	}
+
+	@Override
+	public List<Review> getProductReviews(Long productId) {
+		return reviewSolrService.getProductReviews(productId);
+	}
+
+	@Override
+	public List<Product> getSimilarProducts(Long productId) {
+		return productSolrService.getSimilarProducts(productId);
+	}
+
+	@Override
+	public FieldStatistics getProductRating(Long productId) {
+		return reviewSolrService.getProductRating(productId);
+	}
+
+	@Override
+	public Map<Long, String> getNonImagableVariantData(Long productId,
+			Map<String, String> nonImagableVariant,
+			String imagableVariantMapping, Object imagableVariantValue) {
+
+		return productVariantSolrService.getNonImagableVariantData(productId,
+				nonImagableVariant, imagableVariantMapping,
+				imagableVariantValue);
+	}
+
+	@Override
+	public LinkedHashMap<Category, List<Product>> searchProducts(
+			long categoryId, Map<String, Object> searchTerms) {
+
+		return productSolrService.getProductsOverSearchTerm(categoryId,
+				searchTerms);
+	}
+
+	@Override
+	public Product getVariantProduct(Long productId, Long variantId) {
+
+		return productSolrService.getVariantProduct(productId, variantId);
+	}
+
+}

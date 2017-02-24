@@ -1,0 +1,45 @@
+package com.sot.ecommerce.vo;
+
+/**
+ * This class serves the purpose to represent a Product (Name, Identifier)
+ * to show in a Product drop box
+ * format.
+ * 
+ * @author vaibhav.jain
+ * 
+ */
+
+public class PromotionProductVO {
+
+	private String productName;
+
+	private Long productId;
+
+	public PromotionProductVO() {
+	}
+
+	public PromotionProductVO(Long categoryId, String categoryName) {
+		this.setProductId(categoryId);
+
+		this.setProductName(categoryName);
+
+	}
+
+	public String getProductName() {
+		return productName;
+	}
+
+	public void setProductName(String productName) {
+		this.productName = productName;
+	}
+
+	public Long getProductId() {
+		return productId;
+	}
+
+	public void setProductId(Long productId) {
+		this.productId = productId;
+	}
+
+
+}

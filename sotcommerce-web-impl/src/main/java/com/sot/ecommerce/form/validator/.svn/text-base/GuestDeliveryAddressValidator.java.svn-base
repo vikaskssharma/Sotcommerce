@@ -1,0 +1,282 @@
+
+package com.sbsc.fos.um.web.form.validator;
+
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.Errors;
+import org.springframework.validation.ValidationUtils;
+import org.springframework.validation.Validator;
+
+import com.sbsc.fos.um.web.form.DeliveryAddressesForm;
+
+@Component
+public class GuestDeliveryAddressValidator implements Validator {
+
+
+	private static final int USER_ZIPCODE_MAX_LENGTH = 8;
+
+	private static final int USER_ZIPCODE_MIN_LENGTH = 5;
+	
+
+	
+	private static final int USER_PHONE_MAX = 10;
+	private static final int USER_PHONE_MIN = 7;
+	private static final int USER_EMAIL_MAX_LENGTH=32;
+
+
+	//private static final String CITY_PATTERN = "^[a-zA-Z0-9 ]{1,16}$";
+
+	//private static final String STATE_PATTERN = "^[a-zA-Z0-9 ]{1,16}$";
+
+	private static final String PHONE_PATTERN = "^[0-9]{7,10}$";
+	private static final String ZIPCODE_PATTERN = "^[0-9]{5,8}$";
+	private static final String FIRST_NAME_PATTERN = "^[a-zA-Z0-9 ]{1,16}$";
+	private static final String LAST_NAME_PATTERN = "^[a-zA-Z0-9 ]{0,16}$";
+	//private static final String ADDRESS_PATTERN ="^[a-zA-Z0-9#\", '& .()%*-]*$"; //"^[a-zA-Z0-9]+([ \t-]?[a-zA-Z0-9]+)*$";// "^[a-zA-Z0-9]{8,128}$";
+	private static final String EMAIL_ID_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+			+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+
+	@Override
+	public boolean supports(Class<?> arg0) {
+		return false;
+	}
+
+	@Override
+	public void validate(Object command, Errors errors) {
+
+		DeliveryAddressesForm deliveryAddressForm = (DeliveryAddressesForm) command;
+
+		if (StringUtils.isNotBlank(deliveryAddressForm.getBillFirstName())) {
+
+			
+			 if (!this.validatePattern(
+					deliveryAddressForm.getBillFirstName(), FIRST_NAME_PATTERN)) {
+				errors.rejectValue("billFirstName",
+						"billing.user.first.name.format");
+
+			}}
+
+		 else {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "billFirstName",
+					"billing.user.first.name.blank");
+		}
+
+		
+
+
+		
+		if (StringUtils.isBlank(deliveryAddressForm.getBillAddress())) {
+
+			
+				ValidationUtils.rejectIfEmptyOrWhitespace(errors,
+						"billAddress", "billing.user.address.blank");
+			}
+			
+			
+		
+		
+
+			if (StringUtils.isNotBlank(deliveryAddressForm.getBillphone())) {
+
+				if (deliveryAddressForm.getBillphone().length() > USER_PHONE_MAX	|| deliveryAddressForm.getBillphone().length() < USER_PHONE_MIN) {
+
+					errors.rejectValue("billphone",
+							"billing.user.phone.length");
+					
+				}
+
+				else if (!this.validatePattern(
+						deliveryAddressForm.getBillphone(), PHONE_PATTERN)) {
+					errors.rejectValue("billphone",
+							"billing.user.phone.format");
+				}
+
+			} else {
+				ValidationUtils.rejectIfEmptyOrWhitespace(errors, "billphone",
+						"billing.user.phone.blank");
+			}
+
+			
+			
+			
+			if (StringUtils.isBlank(deliveryAddressForm.getBillcity())) {
+
+				ValidationUtils.rejectIfEmptyOrWhitespace(errors, "billcity",
+						"billing.user.city.blank");
+			}
+
+			
+			
+			if (StringUtils.isBlank(deliveryAddressForm.getBillstate())) {
+
+				
+				ValidationUtils.rejectIfEmptyOrWhitespace(errors, "billstate",
+						"billing.user.state.blank");
+			}
+
+			
+			
+			if (StringUtils.isNotBlank(deliveryAddressForm.getBillpincode())) {
+
+				 if (!this.validatePattern(
+						deliveryAddressForm.getBillpincode(), ZIPCODE_PATTERN)) {
+
+					errors.rejectValue("billpincode", "billing.zipcode.format");
+				}
+			
+				 else if (deliveryAddressForm.getBillpincode().length() > USER_ZIPCODE_MAX_LENGTH
+					|| deliveryAddressForm.getBillpincode().length() < USER_ZIPCODE_MIN_LENGTH) {
+
+				errors.rejectValue("billpincode", "billing.zipcode.max.length");
+				
+
+			}
+
+			
+
+		} else {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "billpincode",
+					"billing.user.zipcode.blank");
+		}
+			
+			
+			
+
+		if (StringUtils.isNotBlank(deliveryAddressForm.getShipFirstName())) {
+
+			
+			if (!this.validatePattern(deliveryAddressForm.getShipFirstName(),
+					FIRST_NAME_PATTERN)) {
+				errors.rejectValue("shipFirstName",
+						"shipping.user.first.name.format");
+
+			}
+
+		} else {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "shipFirstName",
+					"shipping.user.first.name.blank");
+		}
+		
+		
+		
+
+		if (deliveryAddressForm.getShipLastName().length() > 0) {
+			
+
+			 if (!this.validatePattern(
+					deliveryAddressForm.getShipLastName(), LAST_NAME_PATTERN)) {
+				errors.rejectValue("shipLastName",
+						"shipping.user.last.name.format");
+
+			}
+		}
+		
+		
+
+		if (StringUtils.isBlank(deliveryAddressForm.getShipAddress())) {
+
+			
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "shipAddress",
+					"shipping.user.address.blank");
+		}
+
+		
+		
+		
+		if (StringUtils.isNotBlank(deliveryAddressForm.getShipphone())) {
+
+			if (deliveryAddressForm.getShipphone().length() > USER_PHONE_MAX 	|| deliveryAddressForm.getShipphone().length() < USER_PHONE_MIN) {
+
+				errors.rejectValue("shipphone", "billing.user.phone.length");
+			}
+
+			else if (!this.validatePattern(deliveryAddressForm.getShipphone(),
+					PHONE_PATTERN)) {
+				errors.rejectValue("shipphone", "shipping.user.phone.format");
+			}
+
+		} else {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "shipphone",
+					"shipping.user.phone.blank");
+		}
+
+		if (StringUtils.isBlank(deliveryAddressForm.getShipcity())) {
+
+			
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "shipcity",
+					"shipping.user.city.blank");
+		}
+
+		if (StringUtils.isBlank(deliveryAddressForm.getShipstate())) {
+
+			
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "shipstate",
+					"shipping.user.state.blank");
+		}
+		
+if ((String.valueOf(deliveryAddressForm.getBillcountryId()).equals("-1"))) {
+			
+			errors.rejectValue("billcountryId", "signup.country.blank");
+					
+			
+		
+		}
+
+if ((String.valueOf(deliveryAddressForm.getShipcountryId()).equals("-1"))) {
+	
+	errors.rejectValue("shipcountryId", "signup.country.blank");
+			
+	
+
+}
+		
+
+		if (StringUtils.isNotBlank(deliveryAddressForm.getShippincode())) {
+			 if (!this.validatePattern(
+					deliveryAddressForm.getShippincode(), ZIPCODE_PATTERN)) {
+
+				errors.rejectValue("shippincode", "shipping.zipcode.format");
+			}
+
+			
+			 else if (deliveryAddressForm.getShippincode().length() > USER_ZIPCODE_MAX_LENGTH || deliveryAddressForm.getShippincode().length() < USER_ZIPCODE_MIN_LENGTH) {
+
+				errors.rejectValue("shippincode",
+						"shipping.zipcode.max.length");
+
+			}
+
+			
+		} else {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "shippincode",
+					"shipping.user.zipcode.blank");
+		}
+		if (StringUtils.isNotBlank(deliveryAddressForm.getGuestEmail())) {
+
+			if (deliveryAddressForm.getGuestEmail().length() > USER_EMAIL_MAX_LENGTH) {
+				errors.rejectValue("guestEmail",
+						"signup.user.email.max.length");
+			}
+			if (!validateEmailID(deliveryAddressForm.getGuestEmail())) {
+				errors.rejectValue("guestEmail", "signup.user.email.ID.format");
+			}
+
+		} else {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "guestEmail",
+					"signup.user.email.ID.blank");
+		}
+
+	}
+
+	public boolean validatePattern(final String input, String pattern) {
+		return Pattern.compile(pattern).matcher(input).matches();
+
+	}
+
+	public boolean validateEmailID(final String emailID) {
+		return Pattern.compile(EMAIL_ID_PATTERN).matcher(emailID).matches();
+
+	}
+}

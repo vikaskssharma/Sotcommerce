@@ -1,0 +1,226 @@
+/**
+ * (c) R Systems International Ltd.
+ */
+package com.sbsc.fos.category.service;
+
+import java.util.HashMap;
+import java.util.List;
+
+import com.sbsc.fos.exception.BusinessFailureException;
+import com.sbsc.fos.persistance.CtgrySctnAttrTbDtl;
+
+/**
+ * This class provides the Services specific to class CtgrySctnAttrTbDtl
+ * (Attribute) for all the tasks related to database operations like Create,
+ * Read, Update & Delete.
+ * 
+ * @author simanchal.patra
+ * 
+ */
+public interface AttributeService {
+
+	/**
+	 * This creates a new CtgrySctnAttrTbDtl (Attribute) in the System for a
+	 * specific Category.
+	 * 
+	 * @param attribute
+	 *            The Category to be created.
+	 * @return The Identifier (Id) of the newly created Attribute.
+	 */
+	public Long create(final CtgrySctnAttrTbDtl attribute);
+
+	/**
+	 * Reads all the Attributes for all the Categories present in the system.
+	 * 
+	 * @return List of all Attributes
+	 */
+	public List<CtgrySctnAttrTbDtl> findAll();
+
+	/**
+	 * Reads a specific CtgrySctnAttrTbDtl (Attribute) from the system whose
+	 * Identifies is provided.
+	 * 
+	 * @param id
+	 *            Identifier of the Attribute to read.
+	 * @return The Attribute.
+	 */
+	public CtgrySctnAttrTbDtl findByID(final long attributeId);
+
+	/**
+	 * Reads all the CtgrySctnAttrTbDtls (Attributes) from the system which
+	 * matches the provided property.
+	 * 
+	 * @param propertyName
+	 *            Name of the field present in the persistence class
+	 *            CtgrySctnAttrTbDtl
+	 * 
+	 * @param value
+	 *            Value for that Property whose name provided in the
+	 *            propertyName.
+	 * @return List of all the Attributes matches the property
+	 */
+	public List<CtgrySctnAttrTbDtl> findAllByProperty(String propertyName,
+			Object value);
+
+	/**
+	 * Reads all the CtgrySctnAttrTbDtls (Attributes) from the system which
+	 * matches all the provided properties.
+	 * 
+	 * @param properties
+	 *            A HashMap containing the properties and their values.
+	 * @return List of all the Attributes matches all the properties
+	 */
+	public List<CtgrySctnAttrTbDtl> findAllByProperty(
+			HashMap<String, Object> properties);
+
+	/**
+	 * Update a existing CtgrySctnAttrTbDtl (Attribute) in the system with the
+	 * newly provided values.
+	 * 
+	 * @param attribute
+	 *            The Attribute with updated values
+	 * @return The updated CtgrySctnAttrTbDtl
+	 */
+	public CtgrySctnAttrTbDtl update(final CtgrySctnAttrTbDtl attribute);
+
+	/**
+	 * Soft-Deletes a CtgrySctnAttrTbDtl (Attribute) and all its child Elements
+	 * in the system if there is no Product exists for that Category to which
+	 * this Attribute belongs.
+	 * 
+	 * @param attributeToDelete
+	 *            Attribute to be deleted
+	 * 
+	 * @throws BusinessFailureException
+	 *             If any Product exists for that Category to which this
+	 *             Attribute belongs
+	 */
+	public void delete(final CtgrySctnAttrTbDtl attributeToDelete)
+			throws BusinessFailureException;
+
+	/**
+	 * Soft-Deletes a CtgrySctnAttrTbDtl (Attribute) and all its child Elements
+	 * in the system if there is no Product exists for that Category to which
+	 * this Attribute belongs.
+	 * 
+	 * @param attributeId
+	 *            Identifier of the Attribute to be deleted
+	 * 
+	 * @throws BusinessFailureException
+	 *             If any Product exists for that Category to which this
+	 *             Attribute belongs.
+	 */
+	public void deleteById(final long attributeId)
+			throws BusinessFailureException;
+
+	/**
+	 * Either save a new CtgrySctnAttrTbDtl (Attribute) or update an existing
+	 * CtgrySctnAttrTbDtl (Attribute) instance, depending upon resolution of the
+	 * unsaved-value checks.
+	 * 
+	 * @param section
+	 *            Instance of the CtgrySctnAttrTbDtl (Attribute) Saved into or
+	 *            Updated in the System
+	 */
+	public void saveOrUpdate(final CtgrySctnAttrTbDtl attribute);
+
+	/**
+	 * Reads all the CtgrySctnAttrTbDtl (Identifier and Name only) present for
+	 * the specified Category.
+	 * 
+	 * @param categoryId
+	 *            Identifier of the specified Category.
+	 * 
+	 * @return A Map containing the Details of the all the Attributes
+	 *         (Identifier and Name only) where key is the Name and Value is the
+	 *         Identifier of that Attribute.
+	 */
+	public HashMap<String, Long> findAllNameId(Long categoryId);
+
+	/**
+	 * Provides the name of the next Attribute-mapping (Column name is Product
+	 * table) available for the specified Category.
+	 * 
+	 * @param categoryId
+	 *            Identifier of the specified Category.
+	 * 
+	 * @return The name of the attribute mapping Column from Product table
+	 */
+	public String getNextAvailableAttributeMapping(Long categoryId);
+
+	/**
+	 * Provides the name of the next Variant Attribute-mapping (Column name is
+	 * Product-Variant table) available for the specified Category.
+	 * 
+	 * @param categoryId
+	 *            Identifier of the specified Category.
+	 * 
+	 * @return The name of the attribute mapping Column from Product Variant
+	 *         table
+	 */
+	public String getNextAvailableVariantAttributeMapping(Long categoryId);
+
+	/**
+	 * Provides the total count of Variant Attribute-mappings present in the
+	 * system for the specified Category.
+	 * 
+	 * @param categoryId
+	 *            Identifier of the specified Category.
+	 * 
+	 * @return Total count of Variant Attribute-mappings
+	 */
+	public Integer getVariantAttributeMappingCount(Long categoryId);
+
+	/**
+	 * Provides the total count of Attribute-mappings present in the system for
+	 * the specified Category.
+	 * 
+	 * @param categoryId
+	 *            Identifier of the specified Category.
+	 * 
+	 * @return Total count of Attribute-mappings
+	 */
+	public Integer getAttributeMappingCount(Long categoryId);
+
+	/**
+	 * Provides the name of the next Numeric Attribute-mapping (Numeric Column
+	 * name is Product table) available for the specified Category.
+	 * 
+	 * @param categoryId
+	 *            Identifier of the specified Category.
+	 * 
+	 * @return The name of the Numeric attribute mapping Column from Product
+	 *         table
+	 */
+	public String getNextAvailableNumericAttributeMapping(Long categoryId);
+
+	/**
+	 * Provides the name of the next Numeric Attribute-mapping (Column name is
+	 * Product Variant table) available for the specified Category.
+	 * 
+	 * @param categoryId
+	 *            Identifier of the specified Category.
+	 * @return The name of the Numeric attribute mapping Column from Product
+	 *         Variant table
+	 */
+	public String getNextAvailableVariantNumericAttributeMapping(Long categoryId);
+
+	/**
+	 * Provides the total count of Imagable Attributes for variant products
+	 * present in the system for the specified Category.
+	 * 
+	 * @param categoryId
+	 *            Identifier of the specified Category.
+	 * 
+	 * @return Total count of Imagable Attributes
+	 */
+	public Integer getImagableAttributeMappingCount(Long categoryId);
+
+	public String getNextAvailableNumericUnitAttributeMapping(Long categoryId);
+
+	public String getNextAvailableNumericUnitVariantAttributeMapping(
+			Long categoryId);
+
+	public Integer getNumericAttributeMappingCount(Long categoryId);
+
+}

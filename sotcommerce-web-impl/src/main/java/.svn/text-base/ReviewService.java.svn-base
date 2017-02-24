@@ -1,0 +1,61 @@
+package com.sbsc.fos.rr.service;
+
+/**
+ * @author gaurav.kumar
+ */
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.sbsc.fos.common.vo.SessionInfo;
+import com.sbsc.fos.exception.BusinessFailureException;
+import com.sbsc.fos.feedback.common.FeedbackVO;
+import com.sbsc.fos.feedback.web.form.FeedbackForm;
+import com.sbsc.fos.persistance.ReviewNRatingTbDetail;
+import com.sbsc.fos.rr.commons.ReviewRatingVO;
+
+
+
+
+@Service
+public interface ReviewService {
+	
+	/**
+	 * Reads a specific Review from the system whose Identifier is provided.
+	 * 
+	 * @param reviewId
+	 *            Identifier of the Review to read.
+	 * @return  ReviewNRatingTbDetail object.
+	 */
+	public ReviewNRatingTbDetail findByID(final long id);
+	
+	public void create(final ReviewNRatingTbDetail entity);
+	
+	public ReviewNRatingTbDetail update(ReviewNRatingTbDetail review);
+	
+	public List<ReviewRatingVO> findReview(HashMap<String, Object> properties);
+	
+	/**
+	 * Reads all the Reviews by Filters 
+	 * 
+	 * @return List of all ReviewVO
+	 */
+	public List<ReviewRatingVO> findAllReviewsByFilters(
+			Map<String, Object> filter_criteria, SessionInfo sessionInfo);
+	
+	public boolean deleteById(final long entityId) throws BusinessFailureException;
+		
+	public List<FeedbackVO> getProductsForOrder(SessionInfo sessionInfo, Long orderId);
+	
+	public boolean updateReview(SessionInfo sessionInfo, FeedbackForm feedbackForm);
+	
+	public List<ReviewNRatingTbDetail> getReviewForOrderAndProduct(Long orderId, Long productId);
+	
+	public List<ReviewNRatingTbDetail> findAllByProperty(String propertyName, Object value);
+	
+}
+

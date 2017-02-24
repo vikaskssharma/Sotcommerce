@@ -1,0 +1,232 @@
+/**
+ * 
+ */
+package com.sot.ecommerce.handler;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.sbsc.fos.category.commons.AttributeVO;
+import com.sbsc.fos.category.commons.CategoryVO;
+import com.sbsc.fos.category.commons.SectionVO;
+import com.sbsc.fos.category.service.AttributeService;
+import com.sbsc.fos.category.service.CategoryService;
+import com.sbsc.fos.category.service.SectionService;
+import com.sbsc.fos.category.web.form.AddSectionForm;
+import com.sbsc.fos.common.vo.SessionInfo;
+import com.sbsc.fos.exception.BusinessFailureException;
+import com.sbsc.fos.persistance.CategoryTbMaster;
+import com.sbsc.fos.persistance.CtgrySctnAttrTbDtl;
+import com.sbsc.fos.persistance.CtgrySctnTbDtl;
+import com.sbsc.fos.utils.DateUtil;
+
+/**
+ * The Handler is class which is a bridge between the Web tier and Service tier.
+ * This class handles all the communication between SectionController to it's
+ * Service layer
+ * 
+ * @author simanchal.patra
+ * 
+ */
+@Component
+public class SectionHandler {
+
+	@Autowired
+	private SectionService sectionService;
+
+	@Autowired
+	private CategoryService categoryService;
+
+	@Autowired
+	private AttributeService attributeService;
+
+	/**
+	 * Provides information about the specified Section.
+	 * 
+	 * @param sectionId
+	 *            Identifier of the Section provided.
+	 * 
+	 * @return The CtgrySctnTbDtl
+	 */
+	public CtgrySctnTbDtl getSection(long sectionId) {
+		return sectionService.findByID(sectionId);
+	}
+
+	/**
+	 * Soft-deletes the specified Section and it's child elements from the
+	 * system if no Product exists for the Category to which this section
+	 * belongs.
+	 * 
+	 * @param sectionId
+	 *            Identifier of the Section.
+	 * 
+	 * @throws BusinessFailureException
+	 *             If no Product exists for the Category to which this section
+	 *             belongs
+	 */
+	public void deleteSection(long sectionId) throws BusinessFailureException {
+		sectionService.deleteById(sectionId);
+	}
+
+	/**
+	 * Provides information about the all the Sections of the specified
+	 * Category.
+	 * 
+	 * @param categoryId
+	 *            Identifier of the Category.
+	 * 
+	 * @return List of Sections of the Category
+	 */
+	public List<SectionVO> getAllSection(long categoryId) {
+
+		HashMap<String, Object> properties = new HashMap<String, Object>();
+
+		List<SectionVO> sectionVoList = new ArrayList<SectionVO>();
+
+		properties.put("categoryTbMaster", getCategory(categoryId));
+
+		properties.put("isDltd", new BigDecimal(0));
+
+		List<CtgrySctnTbDtl> allSectionsList = sectionService
+				.findAllByProperty(properties);
+
+		if (allSectionsList != null && !allSectionsList.isEmpty()) {
+
+			for (CtgrySctnTbDtl ctgrySctnTbDtl : allSectionsList) {
+
+				sectionVoList.add(new SectionVO(ctgrySctnTbDtl.getNmSctnId(),
+						ctgrySctnTbDtl.getVcSctnNm()));
+			}
+
+		}
+
+		return sectionVoList;
+	}
+
+	/**
+	 * Reads information about the specified Category from the System.
+	 * 
+	 * @param categoryId
+	 *            Identifier of the Category whose information needed.
+	 * 
+	 * @return The CategoryTbMaster
+	 */
+	public CategoryTbMaster getCategory(long categoryId) {
+		return categoryService.findByID(categoryId);
+	}
+
+	/**
+	 * Provides all the Categories for a specific Store to which the user is
+	 * signed in.
+	 * 
+	 * @param sessionInfo
+	 *            Session information of the user signed-in.
+	 * 
+	 * @return List of CategoryVO containing the Category information (Id, Name,
+	 *         Parent Category, Status).
+	 */
+	public List<CategoryVO> getAllCategories(SessionInfo sessionInfo) {
+
+		return categoryService.getAllCategories(sessionInfo.getStoreId());
+	}
+
+	/**
+	 * Creates a new Section into the system by using the information provided.
+	 * 
+	 * @param addSectionForm
+	 *            The Data provided by the signed-in user.
+	 * 
+	 * @param sessionInfo
+	 *            Session information of the user signed-in.
+	 * 
+	 * @return Identifier of the newly created Section.
+	 */
+	public Long createNewSection(AddSectionForm addSectionForm,
+			SessionInfo sessionInfo) {
+
+		CtgrySctnTbDtl section = new CtgrySctnTbDtl();
+
+		section.setCategoryTbMaster(getCategory(addSectionForm.getCategoryId()));
+
+		section.setVcSctnNm(addSectionForm.getSectionName().trim());
+
+		section.setNmCrtdBy(new BigDecimal(sessionInfo.getUserId()));
+
+		section.setDtCrtdAt(DateUtil.getCurrentDateTime());
+
+		section.setNmUpdtdBy(new BigDecimal(sessionInfo.getUserId()));
+
+		section.setDtUpdtdAt(DateUtil.getCurrentDateTime());
+
+		section.setIsDltd(new BigDecimal(0));
+
+		return sectionService.create(section);
+
+	}
+
+	/**
+	 * Updates a existing Section with modified values into the System.
+	 * 
+	 * @param addSectionForm
+	 *            Information of the Section modified by the User.
+	 * 
+	 * @param sessionInfo
+	 *            Session information of the user signed-in.
+	 */
+	public void updateSection(AddSectionForm addSectionForm,
+			SessionInfo sessionInfo) {
+
+		CtgrySctnTbDtl section = sectionService.findByID(addSectionForm
+				.getSectionId());
+
+		section.setVcSctnNm(addSectionForm.getSectionName().trim());
+
+		section.setNmUpdtdBy(new BigDecimal(sessionInfo.getUserId()));
+
+		section.setDtUpdtdAt(DateUtil.getCurrentDateTime());
+
+		section.setIsDltd(new BigDecimal(0));
+
+		sectionService.update(section);
+
+	}
+
+	/**
+	 * Provides information about all the Attributes of the specified Section.
+	 * 
+	 * @param sectionId
+	 *            Identifier of the Section.
+	 * 
+	 * @return Specific information about all the Attributes
+	 */
+	public List<AttributeVO> getAllAttributes(Long sectionId) {
+
+		HashMap<String, Object> properties = new HashMap<String, Object>();
+
+		List<AttributeVO> attributeVOList = new ArrayList<AttributeVO>();
+
+		properties.put("ctgrySctnTbDtl", getSection(sectionId));
+
+		properties.put("isDltd", new BigDecimal(0));
+
+		List<CtgrySctnAttrTbDtl> allAttributesList = attributeService
+				.findAllByProperty(properties);
+
+		if (allAttributesList != null && !allAttributesList.isEmpty()) {
+
+			for (CtgrySctnAttrTbDtl ctgrySctnAttrTbDtl : allAttributesList) {
+				attributeVOList.add(new AttributeVO(ctgrySctnAttrTbDtl
+						.getNmAttrId(), ctgrySctnAttrTbDtl.getVcAttrNm()));
+			}
+		}
+
+		return attributeVOList;
+
+	}
+}

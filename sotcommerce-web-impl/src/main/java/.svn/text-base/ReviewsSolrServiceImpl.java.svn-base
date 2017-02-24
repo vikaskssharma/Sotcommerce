@@ -1,0 +1,56 @@
+/**
+ * 
+ */
+package com.sbsc.fos.store.service;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.sbsc.fos.store.solr.data.SolrDAO;
+import com.sbsc.fos.store.web.vo.FieldStatistics;
+import com.sbsc.fos.store.web.vo.Review;
+
+/**
+ * @author simanchal.patra
+ * 
+ */
+@Service
+public class ReviewsSolrServiceImpl implements ReviewsSolrService {
+
+	private SolrDAO<Review> solrDAO;
+
+	@Autowired
+	@Override
+	public void setDAO(SolrDAO<Review> solrDAO) {
+		this.solrDAO = solrDAO;
+		this.solrDAO.setClazz(Review.class);
+	}
+
+	@Override
+	public List<Review> getProductReviews(Long productId) {
+
+		LinkedHashMap<String, Object> criteriaConditions = new LinkedHashMap<>();
+
+		criteriaConditions.put("id", "RR");
+
+		criteriaConditions.put("rvwPrdId", productId);
+
+		return solrDAO.searchHybrid(criteriaConditions, null, 0, 25);
+	}
+
+	@Override
+	public FieldStatistics getProductRating(Long productId) {
+
+		LinkedHashMap<String, Object> criteriaConditions = new LinkedHashMap<>();
+
+		criteriaConditions.put("id", "RR");
+
+		criteriaConditions.put("rvwPrdId", productId);
+
+		return solrDAO.getStatistics(criteriaConditions, "nmRtng");
+	}
+
+}

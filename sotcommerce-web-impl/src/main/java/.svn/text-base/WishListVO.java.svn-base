@@ -1,0 +1,91 @@
+package com.sbsc.fos.wishlist.common;
+
+import java.util.Date;
+
+public class WishListVO {
+	
+	private long wishListID;
+	
+	private long productid;
+	
+	private long variantid;
+	
+	private String status;
+	
+	private String prodImgPath;
+	
+	private String prodName;
+	
+	private String storeName;
+	
+	private Date dateAddWish;
+
+	public long getWishListID() {
+		return wishListID;
+	}
+
+	public void setWishListID(long wishListID) {
+		this.wishListID = wishListID;
+	}
+
+	public String getProdImgPath() {
+		return prodImgPath;
+	}
+
+	public void setProdImgPath(String prodImgPath) {
+		this.prodImgPath = prodImgPath;
+	}
+
+	public String getProdName() {
+		return prodName;
+	}
+
+	public void setProdName(String prodName) {
+		this.prodName = prodName;
+	}
+
+	public String getStoreName() {
+		return storeName;
+	}
+
+	public void setStoreName(String storeName) {
+		this.storeName = storeName;
+	}
+
+	public Date getDateAddWish() {
+		return dateAddWish;
+	}
+
+	public void setDateAddWish(Date dateAddWish) {
+		this.dateAddWish = dateAddWish;
+	}
+
+	public long getProductid() {
+		return productid;
+	}
+
+	public void setProductid(long productid) {
+		this.productid = productid;
+	}
+
+	public long getVariantid() {
+		return variantid;
+	}
+
+	public void setVariantid(long variantid) {
+		this.variantid = variantid;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+
+	
+
+}
+

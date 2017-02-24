@@ -1,0 +1,64 @@
+package com.sot.ecommerce.form.validator;
+
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
+
+/**
+ * 
+ * @author gaurav.kumar
+ * 
+ */
+
+@Component
+public class TrackOrderFormValidator implements Validator {
+
+
+	@Override
+	public boolean supports(Class<?> arg0) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	private static final String EMAIL_ID_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+			+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+	@Override
+	public void validate(Object command, Errors errors) {
+		
+		TrackOrderForm trackOrderForm = (TrackOrderForm) command;
+		
+		if(StringUtils.isEmpty(trackOrderForm.getEmail())){
+			errors.rejectValue("Email", "taxation.email.blank");
+		}else if(!this.validateEmailID(trackOrderForm.getEmail().trim())) {
+			errors.rejectValue("Email", "taxation.email.incorrect.format");
+		}
+		
+		if(StringUtils.isEmpty(trackOrderForm.getOrderNumber())){
+			errors.rejectValue("OrderNumber", "taxation.order.number.blank");
+		}
+		
+		if(!StringUtils.isEmpty(trackOrderForm.getOrderNumber()) 
+				&& !StringUtils.isEmpty(trackOrderForm.getEmail())
+				&& this.validateEmailID(trackOrderForm.getEmail().trim())){
+			if (!trackOrderForm.getOrderNumValidatedForEmail()) {
+				errors.rejectValue("InvalidOrderNumber", "taxation.order.number.invalid");
+			}
+		}
+		
+
+	}
+
+	public boolean validateEmailID(final String emailID) {
+		return Pattern.compile(EMAIL_ID_PATTERN).matcher(emailID).matches();
+
+	}
+	
+	 public boolean validatePattern(final String input, String pattern) {
+			return Pattern.compile(pattern).matcher(input).matches();
+
+		}
+	
+}

@@ -1,0 +1,170 @@
+package com.sbsc.fos.store.service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.solr.client.solrj.response.RangeFacet;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.google.gson.Gson;
+import com.sbsc.fos.store.web.vo.FacetInput;
+import com.sun.org.apache.xpath.internal.axes.HasPositionalPredChecker;
+import com.sbsc.fos.store.web.vo.RangeFacetVO;
+public class test {
+
+
+
+
+  public static void main(final String[] argv) throws JSONException {
+	  
+   /* final JSONObject obj = new JSONObject(JSON_DATA);
+    final JSONArray geodata = obj.getJSONArray("geodata");
+    final int n = geodata.length();
+    for (int i = 0; i < n; ++i) {
+      final JSONObject person = geodata.getJSONObject(i);
+      System.out.println(person.getInt("id"));
+      System.out.println(person.getString("name"));
+      System.out.println(person.getString("gender"));
+      System.out.println(person.getDouble("latitude"));
+      System.out.println(person.getDouble("longitude"));*/
+	  
+	  
+	  //String s = "{menu:{\"1\":\"sql\", \"2\":\"android\", \"3\":\"mvc\"}}";
+
+
+	  //String s=	"{data:{\"cat_id\": \"50\", \"price\": \"0,10000\", \"VC_ATTR1_VALUE\":\"20\"}}";
+	  
+	  
+	//  String st="{criteriaMap:{\"VC_ATTR1_VALUE\":[\"20\",\"40\"]}}";
+	  Gson gson= new Gson();
+	  
+	  
+	//FacetInput input=gson.fromJson(st, FacetInput.class);  
+	  
+	//List list= input.getCriteriaMap().get("VC_ATTR1_VALUE");
+	  
+	 
+			
+ /*FacetInput facetInput =new FacetInput();
+	  
+	  facetInput.setCat_id("49");
+	  
+	  
+	 
+	  
+	  
+	  HashMap<String,String> priceMap =new HashMap<String,String>();
+	  priceMap.put("Price_Min", "10");
+	  priceMap.put("Price_Max", "100000");
+	  facetInput.setPriceMap(priceMap);
+	  
+	  String str=gson.toJson(facetInput);
+		
+		System.out.println("jsonn till price--->"+str);
+	  
+	  HashMap<String,List<String>> criteriaMap =new HashMap<>();
+	  List values=new ArrayList<>();
+	  values.add(20);
+	  values.add(10);
+	  criteriaMap.put("VC_ATTR1_VALUE", values);
+	  facetInput.setCriteriaMap(criteriaMap);
+	  
+	  List<RangeFacetVO> rangevolist = new ArrayList();
+	
+	 
+	  
+	  RangeFacetVO rangeFacetVO=new RangeFacetVO();
+	  
+	  
+	  rangeFacetVO.setAttributeKey("VC_ATTR2_VALUE");
+	   
+	  
+	  	List selectedValues =new ArrayList<>();
+	    selectedValues.add(10);
+	    selectedValues.add(20);
+	    
+	    rangeFacetVO.setSelectedValues(selectedValues);
+	    
+	    List unselectedValues=new ArrayList<>();
+		unselectedValues.add("30");
+		unselectedValues.add("40");
+		
+		rangeFacetVO.setUnselectedValues(unselectedValues);
+		
+		rangevolist.add(rangeFacetVO);
+		
+		RangeFacetVO rangeFacetVO1=new RangeFacetVO();
+		rangeFacetVO1.setAttributeKey("VC_ATTR2_VALUE");
+		    List selectedValues1 =new ArrayList<>();
+		    selectedValues1.add(10);
+		    selectedValues1.add(20);
+		    rangeFacetVO1.setSelectedValues(selectedValues1);
+		    
+		    List unselectedValues1=new ArrayList<>();
+		    unselectedValues1.add("30");
+		    unselectedValues1.add("40");
+			
+			rangeFacetVO1.setUnselectedValues(unselectedValues1);
+			
+			rangevolist.add(rangeFacetVO1);
+		
+		
+		facetInput.setRangevolist(rangevolist);	
+			
+			
+			
+			
+			 str=gson.toJson(facetInput);
+			
+			System.out.println("json--->"+str);*/
+			
+			
+			
+		String genjson="{\"cat_id\":\"49\",\"priceMap\":{\"Price_Max\":\"100000\",\"Price_Min\":\"10\"},\"criteriaMap\":{\"VC_ATTR1_VALUE\":[20,10]}}";			
+		//String jsonData={ "data" : { "cat_id": "50", "priceMap": {"Price_Max":"0.0","Price_Min":"10000.0"},"criteriaMap":{"VC_VRNT_OPTN_1": [],"VC_ATTR2_VALUE": ["Pentagon"]},"rangevolist":[{"attributeKey": "VC_ATTR1_VALUE","selectedValues": [],"unselectedValues": ["[10 TO 16]","[16 TO 22]","[28 TO 34]","[34 TO 40]","[40 TO 46]"]}]}};
+		
+		FacetInput facetInput=gson.fromJson(genjson, FacetInput.class);
+		
+		HashMap  fi=facetInput.getCriteriaMap();
+		
+		//fi.keySet()
+		
+		
+		System.out.println(facetInput);
+	  
+	  
+	  
+			
+	  
+	  /*JSONObject jObject  = new JSONObject(st);
+	    JSONObject  menu = jObject.getJSONObject("categorymap");
+	    
+	    
+	    
+
+	    Map<String,String> map = new HashMap<String,String>();
+	    
+	    
+	    
+	    
+	    Iterator iter = menu.keys();
+	    while(iter.hasNext()){
+	    	
+	    		        String key = (String)iter.next();
+	        String value = menu.getString(key);
+	        
+	        System.out.println("key-->"+key);
+	        System.out.println("value-->"+value);
+	        
+	        
+	        map.put(key,value);*/
+	  //  }
+	  
+    }
+  
+}

@@ -1,0 +1,28 @@
+package com.sbsc.fos.customersupport.service;
+
+
+import java.util.List;
+
+import com.sbsc.fos.persistance.IssueReasonTbMaster;
+
+
+
+
+public interface CustomerSupportIssueReason {
+
+
+
+
+
+
+	public Long saveCustomerQuery(IssueReasonTbMaster customerSupportIssueReason);
+
+	public List<IssueReasonTbMaster> IssueFindAll();
+	public List<IssueReasonTbMaster> findAllByProperty(String propertyName,
+			Object value);
+
+	public IssueReasonTbMaster findById(String string, long reasonid);
+
+	
+
+}

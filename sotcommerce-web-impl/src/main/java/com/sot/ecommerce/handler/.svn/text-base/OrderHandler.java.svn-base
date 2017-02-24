@@ -1,0 +1,152 @@
+package com.sbsc.fos.order.web.handler;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.sbsc.fos.common.vo.SessionInfo;
+import com.sbsc.fos.order.common.OrdersVO;
+import com.sbsc.fos.order.service.OrderService;
+import com.sbsc.fos.persistance.OrderTbMaster;
+import com.sbsc.fos.persistance.UmTbUser;
+import com.sbsc.fos.um.service.UserService;
+
+/**
+ * The Handler is class which is a bridge between the Web tier and Service tier.
+ * This class handles all the communication between ProductOrdersController to
+ * it's Service layer
+ * 
+ * @author vaibhav.jain
+ */
+
+@Component
+public class OrderHandler {
+
+	@Autowired
+	private OrderService orderService;
+	
+	@Autowired
+	private UserService userService;
+	
+	
+
+	public OrderService getOrderService() {
+		return orderService;
+	}
+
+	public void setOrderService(OrderService orderService) {
+		this.orderService = orderService;
+	}
+
+	public List<OrdersVO> allOrderHandle(SessionInfo sessionInfo) {
+		List<OrdersVO> order = orderService.findOrder(sessionInfo);
+		return order;
+	}
+
+	public List<OrdersVO> allOrdersbyProperty(
+			Map<String, Object> filter_criteria, SessionInfo sessionInfo) {
+		filter_criteria.put("filter.OrderTbMaster.storeTbMaster.nmStrId",
+				Long.valueOf(sessionInfo.getStoreId()));
+		//Add desc and asc in key and the pojo field in value to get filtered 
+		//result in sorted order.
+		filter_criteria.put("desc","dtCrtdAt");
+		List<OrdersVO> detailList = orderService
+				.findAllOrderByFilters(filter_criteria);
+		return detailList;
+	}
+
+	public List<OrdersVO> findAllOrderByFilters(
+			Map<String, Object> filter_criteria, SessionInfo sessionInfo) {
+		filter_criteria.put("filter.OrderTbMaster.storeTbMaster.nmStrId",
+				Long.valueOf(sessionInfo.getStoreId()));
+		//Add desc and asc in key and the pojo field in value to get filtered 
+				//result in sorted order.
+		filter_criteria.put("desc","dtCrtdAt");
+		List<OrdersVO> detailList = orderService
+				.findAllOrderByFilters(filter_criteria);
+		return detailList;
+	}
+
+	public List<OrdersVO> findAllOrderHistoryByFilters(
+			Map<String, Object> filter_criteria, SessionInfo sessionInfo) {
+		filter_criteria.put("desc","dtOrdrDt");
+		return orderService.findAllOrderHistoryByFilters(filter_criteria, sessionInfo);
+
+	}
+
+	public List<OrdersVO> trackOrderHandle(String orderNumber,
+			SessionInfo sessionInfo) {
+		HashMap<String, Object> properties = new HashMap<String, Object>();
+		properties.put("umTbUser.nmUsrId", (sessionInfo.getUserId()));
+		properties.put("storeTbMaster.nmStrId", sessionInfo.getStoreId());
+		properties.put("vcOrdrNmbr", orderNumber.toUpperCase());
+		return orderService.trackOrder(properties);
+	}
+
+	public List<OrdersVO> orderHistoryHandle(SessionInfo sessionInfo) {
+
+		return orderService.findOrderHistory(sessionInfo);
+	}
+
+	
+	public void create(OrderTbMaster order) {
+		
+		orderService.create(order);
+	}
+	
+
+	public void update(OrderTbMaster order) {
+		
+		orderService.update(order);
+	}
+	
+	public HashMap<String, String> getAllStatus() {
+		HashMap<String, String> allStatus = new HashMap<String, String>();
+		List<String> status = orderService.getAllStatus();
+		for (String orderStatus : status) {
+			allStatus.put(orderStatus, orderStatus);
+		}
+		return allStatus;
+	}
+	
+	public boolean getOrderNumValidatedForEmail(String email, String orderNumber) {
+	
+		List<UmTbUser> umTbUserlist = new ArrayList<UmTbUser>();
+		String emailAddress = getEmailAddressValidated(email);
+		if (emailAddress != null) {
+
+			umTbUserlist = userService.findAllByProperty("vcEml", emailAddress);
+			Map<String, Object> orderMap = new HashMap<String, Object>();
+			orderMap.put("umTbUser", umTbUserlist.get(0));
+			orderMap.put("vcOrdrNmbr", orderNumber);
+			List<OrderTbMaster> orderList = orderService
+					.findOrdersbyProperties(orderMap);
+			if (orderList.size() > 0) {
+				return true;
+			} 
+		}
+		return false;
+	}
+	
+	public String getEmailAddressValidated(String emailAddress) {
+		List<UmTbUser> umTbUserlist = new ArrayList<UmTbUser>();
+		umTbUserlist = userService.findAllByProperty("vcEml", emailAddress);
+		if (umTbUserlist.size() > 0) {
+			return umTbUserlist.get(0).getVcEml();
+		}
+		return null;
+	}
+
+	public UserService getUserService() {
+		return userService;
+	}
+
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
+	
+}

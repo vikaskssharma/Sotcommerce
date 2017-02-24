@@ -1,0 +1,145 @@
+/**
+ * (c) R Systems International Ltd. 
+ * @author gaurav_kumar
+ */
+package com.sbsc.fos.banner.common;
+
+import java.util.Date;
+
+
+public class BannerVO {
+
+	private Long bannerId;
+
+	private String bannerName;
+	
+	private String bannerPage;
+	
+	private String bannerPosition;
+	
+	private String bannerCategory;
+	
+	private String bannerImagePath;
+	
+	private String bannerStatus;
+	
+	private Date bannerCreatedAt;
+	
+	private Date bannerActiveFrom;
+	
+	private Date bannerActiveTo;
+	
+	private Boolean isFromDateDisabled;
+	
+	private Boolean isToDateDisabled;
+
+	public String getBannerName() {
+		return bannerName;
+	}
+
+	public void setBannerName(String bannerName) {
+		this.bannerName = bannerName;
+	}
+
+	public String getBannerPage() {
+		return bannerPage;
+	}
+
+	public void setBannerPage(String bannerPage) {
+		this.bannerPage = bannerPage;
+	}
+
+	public String getBannerPosition() {
+		return bannerPosition;
+	}
+
+	public void setBannerPosition(String bannerPosition) {
+		this.bannerPosition = bannerPosition;
+	}
+
+	public String getBannerCategory() {
+		return bannerCategory;
+	}
+
+	public void setBannerCategory(String bannerCategory) {
+		this.bannerCategory = bannerCategory;
+	}
+
+	public String getBannerImagePath() {
+		return bannerImagePath;
+	}
+
+	public void setBannerImagePath(String bannerImagePath) {
+		this.bannerImagePath = bannerImagePath;
+	}
+
+	public String getBannerStatus() {
+		return bannerStatus;
+	}
+
+	public void setBannerStatus(String bannerStatus) {
+		this.bannerStatus = bannerStatus;
+	}
+
+	public Date getBannerActiveFrom() {
+		return bannerActiveFrom;
+	}
+
+	public void setBannerActiveFrom(Date bannerActiveFrom) {
+		this.bannerActiveFrom = bannerActiveFrom;
+	}
+
+	public Date getBannerActiveTo() {
+		return bannerActiveTo;
+	}
+
+	public void setBannerActiveTo(Date bannerActiveTo) {
+		this.bannerActiveTo = bannerActiveTo;
+	}
+
+	public Long getBannerId() {
+		return bannerId;
+	}
+
+	public void setBannerId(Long bannerId) {
+		this.bannerId = bannerId;
+	}
+
+	public Date getBannerCreatedAt() {
+		return bannerCreatedAt;
+	}
+
+	public void setBannerCreatedAt(Date bannerCreatedAt) {
+		this.bannerCreatedAt = bannerCreatedAt;
+	}
+
+	/**
+	 * @return the isFromDateDisabled
+	 */
+	public Boolean getIsFromDateDisabled() {
+		return isFromDateDisabled;
+	}
+
+	/**
+	 * @param isFromDateDisabled the isFromDateDisabled to set
+	 */
+	public void setIsFromDateDisabled(Boolean isFromDateDisabled) {
+		this.isFromDateDisabled = isFromDateDisabled;
+	}
+
+	/**
+	 * @return the isToDateDisabled
+	 */
+	public Boolean getIsToDateDisabled() {
+		return isToDateDisabled;
+	}
+
+	/**
+	 * @param isToDateDisabled the isToDateDisabled to set
+	 */
+	public void setIsToDateDisabled(Boolean isToDateDisabled) {
+		this.isToDateDisabled = isToDateDisabled;
+	}
+	
+
+}

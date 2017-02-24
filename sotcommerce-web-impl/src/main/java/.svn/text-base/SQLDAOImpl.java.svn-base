@@ -1,0 +1,776 @@
+/**
+ * (c) R Systems International Ltd.
+ */
+package com.sbsc.fos.common.dao;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+
+import org.apache.log4j.Logger;
+import org.hibernate.HibernateException;
+import org.hibernate.SQLQuery;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.type.StandardBasicTypes;
+import org.hibernate.type.Type;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Repository;
+
+import com.sbsc.fos.category.commons.CategoryPlaceHolderTreeVO;
+import com.sbsc.fos.category.commons.CategoryVO;
+import com.sbsc.fos.persistance.CategoryTbMaster;
+import com.sbsc.fos.persistance.CtgrySctnAttrTbDtl;
+import com.sbsc.fos.product.service.ProductService;
+
+/**
+ * This class allows to add methods and allows to add SQL queries specific to
+ * modules which requires execution SQL queries to achieve the functionality.
+ * This provides Hibernate interfaces to execute those SQL queries.
+ * 
+ * @author simanchal.patra
+ */
+@Repository
+@Scope(BeanDefinition.SCOPE_SINGLETON)
+public class SQLDAOImpl implements SQLDAO {
+
+	/** Logger instance. **/
+	private static final Logger logger = Logger.getLogger(SQLDAOImpl.class);
+
+	private static final String indent = "&nbsp;";
+
+	@Autowired
+	ProductService productService;
+
+	/**
+	 * The SQL query to calculate the name of the next available
+	 * Attribute-mapping
+	 */
+	private static final String SQL_GET_NEXT_AVAIL_ATTRIBUTE_VALUE_MAPPING = "SELECT CASE"
+			+ " WHEN AttributeCount = 0"
+			+ " THEN 'VC_ATTR1_VALUE'"
+			+ " ELSE 'VC_ATTR' || Val  || '_VALUE'"
+			+ " END"
+			+ " AvailAttributeValue"
+			+ " FROM"
+			+ " ("
+			+ " SELECT  ( min_Number - 1 + LEVEL ) AS Val,"
+			+ " CASE WHEN AttributeCount >= 1 THEN 1 ELSE 0 END AttributeCount"
+			+ " FROM"
+			+ " ("
+			+ " SELECT 1  min_number, 25  max_Number, COUNT(NM_CTGRY_ID) AS AttributeCount"
+			+ " FROM CTGRY_SCTN_ATTR_TB_DTL"
+			+ " WHERE IS_DLTD = 0"
+			+ " AND IS_VRNT =  0"
+			+ " AND NM_CTGRY_ID = %d AND IS_NMRC = 0"
+			+ " )"
+			+ " CONNECT BY LEVEL <= max_Number - min_number + 1"
+			+ " MINUS"
+			+ " SELECT CAST ( SUBSTR( VC_ATTR_MPPNG, 8, 2 ) AS NUMBER), COUNT(NM_CTGRY_ID) AS AttributeCount"
+			+ " FROM CTGRY_SCTN_ATTR_TB_DTL"
+			+ " WHERE IS_DLTD = 0 AND"
+			+ " IS_VRNT =  0 AND"
+			+ " NM_CTGRY_ID = %d AND IS_NMRC = 0"
+			+ " GROUP BY VC_ATTR_MPPNG"
+			+ " ORDER BY 1"
+			+ " )"
+			+ " MainData WHERE ROWNUM <2";
+
+	/**
+	 * The SQL query to calculate the name of the next available Variant
+	 * Attribute-mapping
+	 */
+	private static final String SQL_GET_NEXT_AVAIL_VARIANT_OPTION_MAPPING = "SELECT CASE"
+			+ " WHEN VariantCount = 0"
+			+ " THEN 'VC_VRNT_OPTN_1'"
+			+ " ELSE 'VC_VRNT_OPTN_' || Val"
+			+ " END AvailVariantOption"
+			+ " FROM"
+			+ " ("
+			+ " SELECT ( min_Number - 1 + level ) As Val , case when VariantCount >= 1 then 1 else 0 end VariantCount"
+			+ " FROM"
+			+ " ("
+			+ " SELECT 1  min_number, 5  max_Number, Count(NM_CTGRY_ID) as VariantCount"
+			+ " FROM CTGRY_SCTN_ATTR_TB_DTL"
+			+ " WHERE IS_DLTD = 0 AND"
+			+ " IS_VRNT =  1 AND"
+			+ " NM_CTGRY_ID = %d"
+			+ " )"
+			+ " connect by level <= max_Number - min_number + 1"
+			+ " MINUS"
+			+ " SELECT CAST ( SUBSTR ( VC_ATTR_MPPNG , -1 ) as NUMBER) , Count(NM_CTGRY_ID) AS VariantCount"
+			+ " FROM CTGRY_SCTN_ATTR_TB_DTL"
+			+ " WHERE IS_DLTD = 0 AND"
+			+ " IS_VRNT =  1 AND"
+			+ " NM_CTGRY_ID = %d"
+			+ " Group By VC_ATTR_MPPNG"
+			+ " ORDER BY 1"
+			+ " )"
+			+ " MainData WHERE rownum <2";
+
+	/** The SQL query to read Identifier, Name of all Attributes for a Section */
+	private static final String SQL_GET_ALL_ATTRIBUTE_NAME_ID = "SELECT NM_ATTR_ID, VC_ATTR_NM"
+			+ " FROM CTGRY_SCTN_ATTR_TB_DTL"
+			+ " WHERE NM_CTGRY_ID = %d AND"
+			+ " IS_DLTD = 0";
+	/**
+	 * The SQL query to count total of Variant Attribute-mappings for a Category
+	 */
+	private static final String SQL_GET_VARIANT_ATTRIBUTE_MAPPING_COUNT = "Select COUNT(NM_ATTR_ID) AS TOTAL_VARIANT"
+			+ " from CTGRY_SCTN_ATTR_TB_DTL"
+			+ " where NM_CTGRY_ID = %d AND"
+			+ " IS_VRNT = 1 AND IS_DLTD = 0";
+
+	/**
+	 * The SQL query to read all Place holder Categories specific to a Store in
+	 * a Tree format.
+	 */
+	private static final String SQL_GET_ALL_PLACEHOLDER_HIERARCHY_TREE = "SELECT NM_CTGRY_ID, VC_CTGRY_NM, NM_PRNT_CTGRY_ID, LEVEL"
+			+ " FROM Category_TB_MASTER WHERE"
+			+ " NM_STR_ID = %d AND"
+			+ " IS_PLCHLDR = 1 AND"
+			+ " IS_DLTD = 0 AND"
+			+ " NM_STR_ID IS Not Null"
+			+ " START WITH NM_PRNT_CTGRY_ID is NULL"
+			+ " CONNECT BY PRIOR NM_CTGRY_ID = NM_PRNT_CTGRY_ID";
+
+	/**
+	 * The SQL query to read all Non Place holder Categories specific to a Store in
+	 * a Tree format.
+	 */
+	private static final String SQL_GET_ALL_CATEGORY_HIERARCHY_TREE = "SELECT NM_CTGRY_ID, VC_CTGRY_NM, NM_PRNT_CTGRY_ID, LEVEL"
+			+ " FROM Category_TB_MASTER WHERE"
+			+ " NM_STR_ID = %d AND"
+			+ " IS_DLTD = 0 AND"
+			+ " NM_STR_ID IS Not Null"
+			+ " START WITH NM_PRNT_CTGRY_ID is NULL"
+			+ " CONNECT BY PRIOR NM_CTGRY_ID = NM_PRNT_CTGRY_ID";
+	
+	/**
+	 * The SQL query to read all Categories specific to a Store in a Tree
+	 * format.
+	 */
+	private static final String SQL_GET_ALL_CATEGORIES = "SELECT cm.NM_CTGRY_ID, cm.VC_CTGRY_NM, cm.NM_PRNT_CTGRY_ID,"
+			+ " cm.VC_STTS, cm.IS_PLCHLDR, LEVEL"
+			+ " FROM Category_TB_MASTER cm WHERE"
+			+ " cm.NM_STR_ID IS NOT NULL AND"
+			+ " cm.IS_DLTD = 0 AND"
+			+ " cm.NM_STR_ID = %d"
+			+ " START WITH cm.NM_PRNT_CTGRY_ID IS NULL"
+			+ " CONNECT BY PRIOR cm.NM_CTGRY_ID = cm.NM_PRNT_CTGRY_ID";
+
+	/** The SQL query to read Identifier, Name of all Categories for a Store */
+	private static final String SQL_GET_ALL_CATEGORY_NAME_ID = "SELECT VC_CTGRY_NM, NM_CTGRY_ID"
+			+ " FROM Category_TB_MASTER"
+			+ " WHERE NM_STR_ID = %d AND"
+			+ " IS_DLTD = 0";
+
+	/** The SQL query to read Identifier, Name of all Sections for a Category */
+	private static final String SQL_GET_ALL_SECTION_NAME_ID = "SELECT NM_SCTN_ID, VC_SCTN_NM"
+			+ " FROM CTGRY_SCTN_TB_DTL"
+			+ " WHERE NM_CTGRY_ID = %d AND IS_DLTD = 0";
+
+	private static final String SQL_GET_ATTRIBUTE_MAPPING_COUNT = "Select COUNT(NM_ATTR_ID) TOTAL_ATTRIBUTES"
+			+ " from CTGRY_SCTN_ATTR_TB_DTL"
+			+ " where NM_CTGRY_ID = %d AND"
+			+ " IS_VRNT = 0 AND IS_NMRC = 0 AND IS_DLTD = 0";
+
+	private static final String SQL_GET_NUMERIC_ATTRIBUTE_MAPPING_COUNT = "Select COUNT(NM_ATTR_ID) TOTAL_ATTRIBUTES"
+			+ " from CTGRY_SCTN_ATTR_TB_DTL"
+			+ " where NM_CTGRY_ID = %d AND"
+			+ " IS_DLTD = 0 AND IS_NMRC = 1";
+
+	private static final String SQL_GET_IMAGABLE_ATTRIBUTE_MAPPING_COUNT = "Select COUNT(NM_ATTR_ID) TOTAL_ATTRIBUTES"
+			+ " from CTGRY_SCTN_ATTR_TB_DTL"
+			+ " where NM_CTGRY_ID = %d AND"
+			+ " IS_VRNT = 1 AND IS_IMGBL = 1 AND IS_DLTD = 0";
+
+	private static final String SQL_GET_NEXT_AVAILABLE_NUMERIC_ATTRIB_MAPPING = "SELECT CASE WHEN AttributeCount = 0 THEN 'NM_ATTR1_VALUE' ELSE 'NM_ATTR' || Val  || '_VALUE' END AvailAttributeValue"
+			+ " FROM ("
+			+ " SELECT  ( min_Number - 1 + LEVEL ) AS Val, CASE WHEN AttributeCount >= 1 THEN 1 ELSE 0 END AttributeCount"
+			+ " FROM"
+			+ " ("
+			+ " SELECT 1  min_number, 5  max_Number, COUNT(NM_CTGRY_ID) AS AttributeCount"
+			+ " FROM CTGRY_SCTN_ATTR_TB_DTL"
+			+ " WHERE IS_DLTD = 0 AND IS_VRNT =  0 AND NM_CTGRY_ID =%d AND IS_NMRC = 1"
+			+ " )"
+			+ " CONNECT BY LEVEL <= max_Number - min_number + 1"
+			+ " MINUS"
+			+ " SELECT CAST ( SUBSTR( VC_ATTR_MPPNG, 8, 2 ) AS NUMBER), COUNT(NM_CTGRY_ID) AS AttributeCount"
+			+ " FROM CTGRY_SCTN_ATTR_TB_DTL"
+			+ " WHERE IS_DLTD = 0 AND IS_VRNT =  0 AND NM_CTGRY_ID = %d  AND IS_NMRC = 1 GROUP BY VC_ATTR_MPPNG ORDER BY 1)  MainData WHERE ROWNUM <2";
+
+	private static final String SQL_GET_NEXT_AVAILABLE_UNIT_TYPE_MAPPING = "SELECT CASE WHEN AttributeCount = 0 THEN 'VC_ATTR1_UNT_VALUE' ELSE 'VC_ATTR' || Val  || '_UNT_VALUE'  END AvailAttributeValue FROM"
+			+ " ("
+			+ " SELECT  (min_Number - 1+LEVEL) AS Val,CASE WHEN AttributeCount >= 1 THEN 1 ELSE 0 END AttributeCount"
+			+ " FROM ("
+			+ " SELECT 1  min_number"
+			+ " , 5  max_Number,COUNT(NM_CTGRY_ID) AS AttributeCount"
+			+ " FROM CTGRY_SCTN_ATTR_TB_DTL WHERE IS_DLTD = 0 AND IS_VRNT =  0 AND NM_CTGRY_ID = %d   AND IS_NMRC = 1             )"
+			+ " CONNECT BY LEVEL <= max_Number - min_number + 1"
+			+ " MINUS"
+			+ " SELECT CAST(SUBSTR(VC_UNT_TYP_MPPNG,8,1) AS NUMBER),COUNT(NM_CTGRY_ID) AS AttributeCount"
+			+ " FROM CTGRY_SCTN_ATTR_TB_DTL WHERE IS_DLTD = 0 AND IS_VRNT =  0 AND NM_CTGRY_ID = %d   AND IS_NMRC = 1 GROUP BY VC_UNT_TYP_MPPNG ORDER BY 1)  MainData WHERE ROWNUM <2";
+
+	private static final String SQL_GET_NEXT_AVAILABLE_NUMERIC_VARIANT_ATTRIB_MAPPING = "SELECT CASE WHEN VariantCount = 0 THEN 'NM_VRNT_OPTN_1' ELSE 'NM_VRNT_OPTN_' || Val END AvailVariantOption FROM"
+			+ " ("
+			+ " SELECT  (min_Number - 1+LEVEL) AS Val,CASE WHEN VariantCount >= 1 THEN 1 ELSE 0 END VariantCount"
+			+ " FROM ("
+			+ " SELECT 1  min_number"
+			+ " , 5  max_Number,COUNT(NM_CTGRY_ID) AS VariantCount"
+			+ " FROM CTGRY_SCTN_ATTR_TB_DTL WHERE IS_DLTD = 0 AND IS_VRNT =  1 AND NM_CTGRY_ID = %d  AND IS_NMRC =1"
+			+ " )"
+			+ " CONNECT BY LEVEL <= max_Number - min_number + 1"
+			+ " MINUS"
+			+ " SELECT CAST(SUBSTR(VC_ATTR_MPPNG,-1) AS NUMBER),COUNT(NM_CTGRY_ID) AS VariantCount"
+			+ " FROM CTGRY_SCTN_ATTR_TB_DTL WHERE IS_DLTD = 0 AND IS_VRNT =  1 AND NM_CTGRY_ID = %d  AND IS_NMRC =1 GROUP BY VC_ATTR_MPPNG)  MainData WHERE ROWNUM <2";
+
+	private static final String SQL_GET_NEXT_AVAILABLE_VARIANT_UNIT_TYPE_MAPPING = "SELECT CASE WHEN VariantCount = 0 THEN 'VC_VRNT_OPTN_1_UNT' ELSE 'VC_VRNT_OPTN_' || Val || '_UNT' END AvailVariantOption FROM"
+			+ " ("
+			+ " SELECT  (min_Number - 1+LEVEL) AS Val,CASE WHEN VariantCount >= 1 THEN 1 ELSE 0 END VariantCount"
+			+ " FROM ("
+			+ " SELECT 1  min_number"
+			+ " , 5  max_Number,COUNT(NM_CTGRY_ID) AS VariantCount"
+			+ " FROM CTGRY_SCTN_ATTR_TB_DTL WHERE IS_DLTD = 0 AND IS_VRNT =  1 AND NM_CTGRY_ID = %d   AND IS_NMRC = 1"
+			+ " )"
+			+ " CONNECT BY LEVEL <= max_Number - min_number + 1"
+			+ " MINUS"
+			+ " SELECT CAST(SUBSTR(VC_UNT_TYP_MPPNG,14,1) AS NUMBER),COUNT(NM_CTGRY_ID) AS VariantCount"
+			+ " FROM CTGRY_SCTN_ATTR_TB_DTL WHERE IS_DLTD = 0 AND IS_VRNT =  1 AND NM_CTGRY_ID = %d  AND IS_NMRC = 1  GROUP BY VC_UNT_TYP_MPPNG)  MainData WHERE ROWNUM <2";
+	
+	private static final String SQL_GET_ALL_PAGES = "SELECT VC_PG_NM FROM PAGE_LOCATION_TB_MASTER WHERE IS_DLTD = 0";
+	
+	private static final String SQL_GET_ALL_PAGE_POSITION = "SELECT DISTINCT(VC_PG_LCTN_NM) FROM PAGE_LOCATION_TB_MASTER WHERE IS_DLTD = 0";
+	
+	private static final String SQL_GET_ALL_ORDER_STATUS = "SELECT VC_STTS_DESC FROM ORDER_STATUS_TB_MASTER";
+
+	@Autowired
+	private SessionFactory sessionFactory;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.sbsc.fos.common.dao.SQLDAO#executeSQLQuery(java.lang.String)
+	 */
+	private List<?> executeSQLQuery(final String sqlQuery) {
+
+		SQLQuery query = getCurrentSession().createSQLQuery(sqlQuery);
+
+		logger.info("SQL query to be executed is : " + query);
+
+		try {
+			return query.list();
+		} catch (HibernateException hbExp) {
+			logger.error(String.format(
+					"Error occured while executing query without Scalar"
+							+ " mapping - %s ", query.getQueryString()), hbExp);
+		}
+
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.sbsc.fos.common.dao.SQLDAO#executeSQLQuery(java.lang.String,
+	 * java.util.LinkedHashMap)
+	 */
+	private List<?> executeSQLQuery(final String sqlQuery,
+			LinkedHashMap<String, Type> scalarMapping) {
+
+		SQLQuery query = getCurrentSession().createSQLQuery(sqlQuery);
+
+		for (String columnName : scalarMapping.keySet()) {
+
+			query.addScalar(columnName, scalarMapping.get(columnName));
+		}
+
+		logger.info("SQL query to be executed with Scalar mapping is : "
+				+ query);
+
+		try {
+			return query.list();
+		} catch (HibernateException hbExp) {
+			logger.error(String.format(
+					"Error occured while executing query - %s ",
+					query.getQueryString()), hbExp);
+		}
+
+		return null;
+	}
+
+	protected final Session getCurrentSession() {
+
+		try {
+			return sessionFactory.getCurrentSession();
+		} catch (HibernateException hbExp) {
+			logger.error(
+					"Error occured while obtaining current Hibernate Session"
+							+ " to execute Query", hbExp);
+		}
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.sbsc.fos.common.dao.SQLDAO#getNextAvailableAttributeMapping(java.
+	 * lang.Long)
+	 */
+	@Override
+	public String getNextAvailableAttributeMapping(Long categoryId) {
+
+		String sqlQuery = String.format(
+				SQL_GET_NEXT_AVAIL_ATTRIBUTE_VALUE_MAPPING, categoryId,
+				categoryId);
+
+		return (String) executeSQLQuery(sqlQuery).iterator().next();
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.sbsc.fos.common.dao.SQLDAO#getNextAvailableNumericAttributeMapping
+	 * (java.lang.Long)
+	 */
+	@Override
+	public String getNextAvailableNumericAttributeMapping(Long categoryId) {
+
+		String sqlQuery = String.format(
+				SQL_GET_NEXT_AVAILABLE_NUMERIC_ATTRIB_MAPPING, categoryId,
+				categoryId);
+
+		return (String) executeSQLQuery(sqlQuery).iterator().next();
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.sbsc.fos.common.dao.SQLDAO#getNextAvailableVariantAttributeMapping
+	 * (java.lang.Long)
+	 */
+	@Override
+	public String getNextAvailableVariantAttributeMapping(Long categoryId) {
+
+		String sqlQuery = String.format(
+				SQL_GET_NEXT_AVAIL_VARIANT_OPTION_MAPPING, categoryId,
+				categoryId);
+
+		return (String) executeSQLQuery(sqlQuery).iterator().next();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.sbsc.fos.common.dao.SQLDAO#getNextAvailableNumericUnitAttributeMapping
+	 * (java.lang.Long)
+	 */
+	@Override
+	public String getNextAvailableNumericUnitAttributeMapping(Long categoryId) {
+
+		String sqlQuery = String.format(
+				SQL_GET_NEXT_AVAILABLE_UNIT_TYPE_MAPPING, categoryId,
+				categoryId);
+
+		return (String) executeSQLQuery(sqlQuery).iterator().next();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.sbsc.fos.common.dao.SQLDAO#
+	 * getNextAvailableNumericUnitVariantAttributeMapping(java.lang.Long)
+	 */
+	@Override
+	public String getNextAvailableNumericUnitVariantAttributeMapping(
+			Long categoryId) {
+
+		String sqlQuery = String.format(
+				SQL_GET_NEXT_AVAILABLE_VARIANT_UNIT_TYPE_MAPPING, categoryId,
+				categoryId);
+
+		return (String) executeSQLQuery(sqlQuery).iterator().next();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.sbsc.fos.common.dao.SQLDAO#getNextAvailableVariantNumericAttributeMapping
+	 * (java.lang.Long)
+	 */
+	@Override
+	public String getNextAvailableVariantNumericAttributeMapping(Long categoryId) {
+
+		String sqlQuery = String.format(
+				SQL_GET_NEXT_AVAILABLE_NUMERIC_VARIANT_ATTRIB_MAPPING,
+				categoryId, categoryId);
+
+		return (String) executeSQLQuery(sqlQuery).iterator().next();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.sbsc.fos.common.dao.SQLDAO#findAllAttributeNameID(java.lang.Long)
+	 */
+	@Override
+	public HashMap<String, Long> findAllAttributeNameID(Long categoryId) {
+
+		String sqlFomatted = String.format(SQL_GET_ALL_ATTRIBUTE_NAME_ID,
+				categoryId);
+
+		HashMap<String, Long> nameIdMap = new HashMap<String, Long>();
+
+		LinkedHashMap<String, Type> scalarMapping = new LinkedHashMap<String, Type>();
+		scalarMapping.put("VC_ATTR_NM", StandardBasicTypes.STRING);
+		scalarMapping.put("NM_ATTR_ID", StandardBasicTypes.LONG);
+
+		Iterator<?> results = executeSQLQuery(sqlFomatted, scalarMapping)
+				.iterator();
+
+		while (results.hasNext()) {
+
+			Object[] rows = (Object[]) results.next();
+
+			nameIdMap.put(((String) rows[0]).toLowerCase(), (Long) rows[1]);
+		}
+
+		return nameIdMap;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.sbsc.fos.common.dao.SQLDAO#getVariantAttributeCount(java.lang.Long)
+	 */
+	@Override
+	public int getVariantAttributeMappingCount(Long categoryId) {
+
+		String sqlFomatted = String.format(
+				SQL_GET_VARIANT_ATTRIBUTE_MAPPING_COUNT, categoryId);
+
+		LinkedHashMap<String, Type> scalarMapping = new LinkedHashMap<String, Type>();
+		scalarMapping.put("TOTAL_VARIANT", StandardBasicTypes.INTEGER);
+
+		return (Integer) executeSQLQuery(sqlFomatted, scalarMapping).iterator()
+				.next();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.sbsc.fos.common.dao.SQLDAO#getPlaceHolderHierarchyTree(java.lang.
+	 * Long)
+	 */
+	@Override
+	public List<CategoryPlaceHolderTreeVO> getPlaceHolderHierarchyTree(
+			Long storeId) {
+
+		String sqlFomatted = String.format(
+				SQL_GET_ALL_PLACEHOLDER_HIERARCHY_TREE, storeId);
+
+		LinkedHashMap<String, Type> scalarMapping = new LinkedHashMap<String, Type>();
+
+		scalarMapping.put("NM_CTGRY_ID", StandardBasicTypes.LONG);
+		scalarMapping.put("VC_CTGRY_NM", StandardBasicTypes.STRING);
+		scalarMapping.put("NM_PRNT_CTGRY_ID", StandardBasicTypes.LONG);
+		scalarMapping.put("LEVEL", StandardBasicTypes.SHORT);
+
+		Iterator<?> results = executeSQLQuery(sqlFomatted, scalarMapping)
+				.iterator();
+
+		List<CategoryPlaceHolderTreeVO> CategoryTbMasterTree = new ArrayList<CategoryPlaceHolderTreeVO>();
+
+		Short level = -1;
+
+		Object[] rows = null;
+
+		StringBuffer catNameLabel = null;
+
+		while (results.hasNext()) {
+
+			catNameLabel = new StringBuffer(5);
+
+			rows = (Object[]) results.next();
+
+			level = (Short) rows[3];
+
+			System.out
+					.println("CategoryTbMaster_HIERARCHY_TREE level " + level);
+
+			if (level > 1) {
+				for (int i = 0; i < level; i++) {
+					catNameLabel.append(indent + indent);
+				}
+			}
+
+			CategoryTbMasterTree.add(new CategoryPlaceHolderTreeVO(
+					(Long) rows[0], (catNameLabel.append((String) rows[1])
+							.toString()), level));
+
+		}
+
+		System.out.println("CategoryTbMasterTree  size  ===> "
+				+ CategoryTbMasterTree.size());
+
+		return CategoryTbMasterTree;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.sbsc.fos.common.dao.SQLDAO#getAllCategories(java.lang.Long)
+	 */
+	@Override
+	public List<CategoryVO> getAllCategories(Long storeId) {
+
+		String sqlFomatted = String.format(SQL_GET_ALL_CATEGORIES, storeId);
+
+		LinkedHashMap<String, Type> scalarMapping = new LinkedHashMap<String, Type>();
+
+		scalarMapping.put("NM_CTGRY_ID", StandardBasicTypes.LONG);
+		scalarMapping.put("VC_CTGRY_NM", StandardBasicTypes.STRING);
+		scalarMapping.put("NM_PRNT_CTGRY_ID", StandardBasicTypes.LONG);
+		scalarMapping.put("VC_STTS", StandardBasicTypes.STRING);
+		scalarMapping.put("IS_PLCHLDR", StandardBasicTypes.BOOLEAN);
+
+		Iterator<?> results = executeSQLQuery(sqlFomatted, scalarMapping)
+				.iterator();
+
+		List<CategoryVO> CategoryVOList = new ArrayList<CategoryVO>();
+
+		Object[] rows = null;
+
+		while (results.hasNext()) {
+
+			rows = (Object[]) results.next();
+
+			HashMap<String, Object> properties = new HashMap<String, Object>();
+
+			CategoryTbMaster category = new CategoryTbMaster();
+
+			category.setNmCtgryId((Long) rows[0]);
+
+			properties.put("categoryTbMaster", category);
+			List<CtgrySctnAttrTbDtl> list = productService
+					.findAllAttributeByCategory(properties);
+
+			Boolean isAttributeAvailable = list.size() > 0;
+
+			CategoryVOList.add(new CategoryVO((Long) rows[0], (String) rows[1],
+					(Long) rows[2], (String) rows[3], (Boolean) rows[4],
+					isAttributeAvailable));
+
+		}
+
+		System.out.println("CategoryTbMasterTree  size  ===> "
+				+ CategoryVOList.size());
+
+		return CategoryVOList;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.sbsc.fos.common.dao.SQLDAO#findAllCategoryNameId(java.lang.Long)
+	 */
+	@Override
+	public HashMap<String, Long> findAllCategoryNameId(Long storeId) {
+
+		String sqlFomatted = String.format(SQL_GET_ALL_CATEGORY_NAME_ID,
+				storeId);
+
+		HashMap<String, Long> nameIdMap = new HashMap<String, Long>();
+
+		LinkedHashMap<String, Type> scalarMapping = new LinkedHashMap<String, Type>();
+		scalarMapping.put("VC_CTGRY_NM", StandardBasicTypes.STRING);
+		scalarMapping.put("NM_CTGRY_ID", StandardBasicTypes.LONG);
+
+		Iterator<?> results = executeSQLQuery(sqlFomatted, scalarMapping)
+				.iterator();
+
+		while (results.hasNext()) {
+
+			Object[] rows = (Object[]) results.next();
+
+			nameIdMap.put(((String) rows[0]).toLowerCase(), (Long) rows[1]);
+		}
+
+		return nameIdMap;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.sbsc.fos.common.dao.SQLDAO#findAllSectionNameId(java.lang.Long)
+	 */
+	@Override
+	public HashMap<String, Long> findAllSectionNameId(Long categoryId) {
+
+		String sqlFomatted = String.format(SQL_GET_ALL_SECTION_NAME_ID,
+				categoryId);
+
+		HashMap<String, Long> idNameMap = new HashMap<String, Long>();
+
+		LinkedHashMap<String, Type> scalarMapping = new LinkedHashMap<String, Type>();
+		scalarMapping.put("VC_SCTN_NM", StandardBasicTypes.STRING);
+		scalarMapping.put("NM_SCTN_ID", StandardBasicTypes.LONG);
+
+		Iterator<?> results = executeSQLQuery(sqlFomatted, scalarMapping)
+				.iterator();
+
+		while (results.hasNext()) {
+
+			Object[] rows = (Object[]) results.next();
+
+			idNameMap.put(((String) rows[0]).toLowerCase(), (Long) rows[1]);
+		}
+
+		return idNameMap;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.sbsc.fos.common.dao.SQLDAO#getAttributeMappingCount(java.lang.Long)
+	 */
+	@Override
+	public Integer getAttributeMappingCount(Long categoryId) {
+
+		String sqlFomatted = String.format(SQL_GET_ATTRIBUTE_MAPPING_COUNT,
+				categoryId);
+
+		LinkedHashMap<String, Type> scalarMapping = new LinkedHashMap<String, Type>();
+		scalarMapping.put("TOTAL_ATTRIBUTES", StandardBasicTypes.INTEGER);
+
+		return (Integer) executeSQLQuery(sqlFomatted, scalarMapping).iterator()
+				.next();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.sbsc.fos.common.dao.SQLDAO#getImagableAttributeMappingCount(java.
+	 * lang.Long)
+	 */
+	@Override
+	public Integer getImagableAttributeMappingCount(Long categoryId) {
+
+		String sqlFomatted = String.format(
+				SQL_GET_IMAGABLE_ATTRIBUTE_MAPPING_COUNT, categoryId);
+
+		LinkedHashMap<String, Type> scalarMapping = new LinkedHashMap<String, Type>();
+		scalarMapping.put("TOTAL_ATTRIBUTES", StandardBasicTypes.INTEGER);
+
+		return (Integer) executeSQLQuery(sqlFomatted, scalarMapping).iterator()
+				.next();
+	}
+
+	@Override
+	public Integer getNumericAttributeMappingCount(Long categoryId) {
+
+		String sqlFomatted = String.format(
+				SQL_GET_NUMERIC_ATTRIBUTE_MAPPING_COUNT, categoryId);
+
+		LinkedHashMap<String, Type> scalarMapping = new LinkedHashMap<String, Type>();
+		scalarMapping.put("TOTAL_ATTRIBUTES", StandardBasicTypes.INTEGER);
+
+		return (Integer) executeSQLQuery(sqlFomatted, scalarMapping).iterator()
+				.next();
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<String> findAllPages() {
+		String sqlFomatted = String.format(SQL_GET_ALL_PAGES);
+		LinkedHashMap<String, Type> scalarMapping = new LinkedHashMap<String, Type>();
+		scalarMapping.put("VC_PG_NM", StandardBasicTypes.STRING);
+		return (List<String>) executeSQLQuery(sqlFomatted, scalarMapping);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<String> findAllPagePosition() {
+		String sqlFomatted = String.format(SQL_GET_ALL_PAGE_POSITION);
+		LinkedHashMap<String, Type> scalarMapping = new LinkedHashMap<String, Type>();
+		scalarMapping.put("VC_PG_LCTN_NM", StandardBasicTypes.STRING);
+		return (List<String>) executeSQLQuery(sqlFomatted, scalarMapping);
+	}
+
+	@Override
+	public List<String> findAllOrderStatus() {
+		String sqlFomatted = String.format(SQL_GET_ALL_ORDER_STATUS);
+		LinkedHashMap<String, Type> scalarMapping = new LinkedHashMap<String, Type>();
+		scalarMapping.put("VC_STTS_DESC", StandardBasicTypes.STRING);
+		return (List<String>) executeSQLQuery(sqlFomatted, scalarMapping);
+	}
+
+	@Override
+	public List<CategoryPlaceHolderTreeVO> getCategoryHierarchyTree(Long storeId) {
+		String sqlFomatted = String.format(
+				SQL_GET_ALL_CATEGORY_HIERARCHY_TREE, storeId);
+
+		LinkedHashMap<String, Type> scalarMapping = new LinkedHashMap<String, Type>();
+
+		scalarMapping.put("NM_CTGRY_ID", StandardBasicTypes.LONG);
+		scalarMapping.put("VC_CTGRY_NM", StandardBasicTypes.STRING);
+		scalarMapping.put("NM_PRNT_CTGRY_ID", StandardBasicTypes.LONG);
+		scalarMapping.put("LEVEL", StandardBasicTypes.SHORT);
+
+		Iterator<?> results = executeSQLQuery(sqlFomatted, scalarMapping)
+				.iterator();
+
+		List<CategoryPlaceHolderTreeVO> CategoryTbMasterTree = new ArrayList<CategoryPlaceHolderTreeVO>();
+
+		Short level = -1;
+
+		Object[] rows = null;
+
+		StringBuffer catNameLabel = null;
+
+		while (results.hasNext()) {
+
+			catNameLabel = new StringBuffer(5);
+
+			rows = (Object[]) results.next();
+
+			level = (Short) rows[3];
+
+			System.out
+					.println("CategoryTbMaster_HIERARCHY_TREE level " + level);
+
+			if (level > 1) {
+				for (int i = 0; i < level; i++) {
+					catNameLabel.append(indent + indent);
+				}
+			}
+
+			CategoryTbMasterTree.add(new CategoryPlaceHolderTreeVO(
+					(Long) rows[0], (catNameLabel.append((String) rows[1])
+							.toString()), level));
+
+		}
+
+		System.out.println("CategoryTbMasterTree  size  ===> "
+				+ CategoryTbMasterTree.size());
+
+		return CategoryTbMasterTree;
+	}
+
+}

@@ -1,0 +1,314 @@
+/**
+ * 
+ */
+package com.sbsc.fos.promotion.service;
+
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.log4j.Logger;
+import org.hibernate.HibernateException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.sbsc.fos.category.service.CategoryService;
+import com.sbsc.fos.common.dao.GenericDAO;
+import com.sbsc.fos.common.vo.SessionInfo;
+import com.sbsc.fos.exception.BusinessFailureException;
+import com.sbsc.fos.persistance.CategoryTbMaster;
+import com.sbsc.fos.persistance.ProductTbMaster;
+import com.sbsc.fos.persistance.PromotionTbMaster;
+import com.sbsc.fos.product.service.ProductService;
+import com.sbsc.fos.promotion.commons.PromotionVO;
+import com.sbsc.fos.promotion.web.form.CategoryAjaxForm;
+import com.sbsc.fos.promotion.web.form.ProductAjaxForm;
+import com.sbsc.fos.um.service.StoreService;
+import com.sbsc.fos.um.service.UserService;
+
+/**
+ * @author vaibhav.jain
+ */
+@Service
+public class PromotionServiceImpl implements PromotionService {
+
+	/** Logger instance. **/
+	private static final Logger logger = Logger
+			.getLogger(PromotionServiceImpl.class);
+
+	private GenericDAO<PromotionTbMaster> dao;
+	
+	private long usrID;
+
+	private long storeID;
+	
+	@Autowired
+	private UserService userService;
+
+	@Autowired
+	private StoreService storeService;
+	
+	@Autowired
+	private CategoryService categoryService;	
+
+	@Autowired
+	private ProductService productService;	
+	
+	@Autowired
+	public void setDAO(GenericDAO<PromotionTbMaster> daoToSet) {
+		dao = daoToSet;
+		dao.setClazz(PromotionTbMaster.class);
+	}
+	
+	@Transactional
+	@Override
+	public Long create(PromotionTbMaster promotionTbMaster) {
+		
+		try {
+			return dao.create(promotionTbMaster);
+		} catch (HibernateException hexp) {
+			logger.error(
+					String.format(
+							"Error occured while creating a new Promotion with name - %s for Store with Id - %s",
+							promotionTbMaster.getVcRlNm(), promotionTbMaster
+									.getStoreTbMaster().getNmStrId()), hexp);
+		} finally {
+
+		}
+		return null;		
+	}
+
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.sbsc.fos.product.service.PromotionService#findAllByProperty(java.lang.String, java.lang.Object)
+	 */
+	@Transactional
+	public List<PromotionTbMaster> findAllByStringPropertyIgnoreCase(String propertyName,
+			String value) {
+		return dao.findAllByStringPropertyIgnoreCase(propertyName, value);
+	}
+
+
+	@Transactional
+	public List<PromotionTbMaster> findAllByProperty(
+			HashMap<String, Object> propertiesMap) {
+		return dao.findAllByProperty(propertiesMap);
+	}
+	
+	@Transactional
+	public List<PromotionTbMaster> findAllByPropertyDateandCount(
+			HashMap<String, Object> propertiesMap) {
+		return dao.findAllByPropertyCountandDate(propertiesMap);
+	}
+
+
+	@Transactional
+	@Override
+	public PromotionTbMaster update(PromotionTbMaster PromotionTbMaster) {
+		return dao.update(PromotionTbMaster);
+	}
+
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.sbsc.fos.category.service.PromotionService#findByID(long)
+	 */
+	@Transactional
+	@Override
+	public PromotionTbMaster findByID(long promotionId) {
+		try {
+			return dao.findByID(promotionId);
+		} catch (HibernateException hexp) {
+			logger.error(String.format(
+					"Error occured while reading a Promotion with id - %s",
+					String.valueOf(promotionId)), hexp);
+		} finally {
+
+		}
+		return null;
+	}
+
+	@Transactional
+	@Override
+	public void saveOrUpdate(PromotionTbMaster PromotionTbMaster) {
+		dao.saveOrUpdate(PromotionTbMaster);
+	}
+
+	
+
+	@Transactional
+	public List<PromotionVO> findPromotion(SessionInfo sessionInfo) {
+
+		List<PromotionVO> detailList = new ArrayList<PromotionVO>();
+		List<PromotionTbMaster> promotionList = null;
+		
+		HashMap<String, Object> userMap = getUserMap(sessionInfo);
+		userMap.put("desc", "dtCrtdAt");
+		promotionList = dao.findAllByProperty(userMap);
+		
+		try {
+			detailList = getDetailList(promotionList);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return detailList;
+	}
+
+	
+
+
+	@Transactional
+	public List<PromotionVO> deleteById(long promoId, SessionInfo sessionInfo)
+			throws BusinessFailureException {
+		
+		PromotionTbMaster promoSoftDel = dao.findByID(promoId);
+		
+		System.out.println("promo item in service--->"+ promoSoftDel.getNmPrmtnRlId());
+		
+		
+		promoSoftDel.setIsDltd(new BigDecimal("1"));
+		dao.update(promoSoftDel);
+		List<PromotionVO> promotionList = findPromotion(sessionInfo);
+		return promotionList;
+		
+	}
+
+	
+	@Transactional
+	public List<PromotionVO> findAllPromotionListByFilters(
+			Map<String, Object> filter_criteria, SessionInfo sessionInfo)
+			throws ParseException {
+		
+		
+		List<PromotionVO> detailList = new ArrayList<PromotionVO>();
+		List<PromotionTbMaster> promoList = null;
+		
+		try {
+			usrID = sessionInfo.getUserId();
+			
+			// todo ---> add filter criteria for userID and store ID
+			filter_criteria.put("filter.PromotionTbMaster.storeTbMaster",
+					storeService.findByID(storeID));
+
+			promoList = dao.findAllByFilters(filter_criteria);
+			
+			detailList = getDetailList(promoList);
+			
+		
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+		}
+		
+		return detailList;
+	}
+
+	
+	
+	/*
+	 * get needed data to be displayed in form of detailList
+	 * 
+	 * @param wishList
+	 * @return
+	 */
+	public List<PromotionVO> getDetailList(List<PromotionTbMaster> promotionList) throws ParseException{
+
+		logger.info("converting promotionList to promotionListVO");
+		List<PromotionVO> detailList = new ArrayList<PromotionVO>();
+
+		Date toDate = null;
+		Date fromDate = null;
+
+		for (PromotionTbMaster promotionTbMaster : promotionList) {
+			PromotionVO promotionVO = new PromotionVO();
+
+			promotionVO.setPromoId(promotionTbMaster.getNmPrmtnRlId());
+			promotionVO
+					.setPromotionRuleName(promotionTbMaster.getVcRlNm());
+			promotionVO
+					.setPromotionRuleCode(promotionTbMaster.getVcRlCd());
+			if(promotionTbMaster.getCategoryTbMaster() != null)
+				promotionVO.setCategoryName(promotionTbMaster.getCategoryTbMaster().getVcCtgryNm());
+			
+			promotionVO.setStatus(promotionTbMaster.getVcStts());
+			
+			logger.info("changing date to string");
+						
+			fromDate = promotionTbMaster.getDtPrmtnFrm().getTime();
+			toDate = promotionTbMaster.getDtPrmtnTo().getTime();
+			
+			promotionVO.setFromDate(fromDate);
+			promotionVO.setToDate(toDate);
+			
+			promotionVO.setIsDel(promotionTbMaster.getIsDltd());
+
+			detailList.add(promotionVO);
+		}
+
+		return detailList;
+	}
+	
+	/*
+	 * returns a Map containing user info from session object
+	 * 
+	 * 
+	 * @param sessionInfo
+	 * @return
+	 */
+	public HashMap<String, Object> getUserMap(SessionInfo sessionInfo) {
+		usrID = sessionInfo.getUserId();
+		storeID = sessionInfo.getStoreId();
+		HashMap<String, Object> userMap = new HashMap<>();
+		
+		BigDecimal softcheck = new BigDecimal("0");
+		
+		userMap.put("storeTbMaster", storeService.findByID(storeID));
+		userMap.put("isDltd", softcheck);
+		return userMap;
+	}
+
+
+	public List<CategoryAjaxForm> getAllCategories(long storeId) throws ParseException {
+		HashMap<String, Object> categoryMap = new HashMap<>();
+		List<CategoryAjaxForm> categoryList = new ArrayList<>();
+		categoryMap.put("storeTbMaster", storeService.findByID(storeId));
+		categoryMap.put("isPlchldr", BigDecimal.valueOf(0L));
+		categoryMap.put("isDltd", BigDecimal.valueOf(0L));
+		categoryMap.put("vcStts", "Active");
+		
+		for (CategoryTbMaster categoryTbMaster : categoryService.findAllByProperty(categoryMap)) {
+			CategoryAjaxForm categoryAjaxForm = new CategoryAjaxForm();
+			categoryAjaxForm.setCategoryID(categoryTbMaster.getNmCtgryId());
+			categoryAjaxForm.setCategoryName(categoryTbMaster.getVcCtgryNm());
+			categoryList.add(categoryAjaxForm);
+		}
+		return categoryList;
+	}	
+	
+	public List<ProductAjaxForm> getAllProducts(long catid) throws ParseException {
+		HashMap<String, Object> productMap = new HashMap<>();
+		List<ProductAjaxForm> productList = new ArrayList<>();
+		//productMap.put("storeTbMaster", storeService.findByID(storeId));
+		productMap.put("categoryTbMaster", categoryService.findByID(catid));
+		productMap.put("isDltd", BigDecimal.valueOf(0L));
+		//productMap.put("vcStts", "Active");
+		
+		for (ProductTbMaster productTbMaster : productService.findAllByProperty(productMap)) {
+			ProductAjaxForm productAjaxForm = new ProductAjaxForm();
+			productAjaxForm.setProductName(productTbMaster.getVcPrdNm());
+			productAjaxForm.setProductId(productTbMaster.getNmPrdId());
+			productList.add(productAjaxForm);
+		}
+		return productList;
+	}	
+
+}

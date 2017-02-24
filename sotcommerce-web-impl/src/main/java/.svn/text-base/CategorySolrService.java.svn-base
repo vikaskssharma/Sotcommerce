@@ -1,0 +1,36 @@
+/**
+ * 
+ */
+package com.sbsc.fos.store.service;
+
+import java.net.MalformedURLException;
+import java.util.List;
+
+import org.apache.solr.client.solrj.SolrServerException;
+
+import com.sbsc.fos.store.solr.data.SolrDAO;
+import com.sbsc.fos.store.web.vo.Category;
+import com.sbsc.fos.store.web.vo.Section;
+
+/**
+ * @author simanchal.patra
+ * 
+ */
+public interface CategorySolrService {
+
+	public void setDAO(SolrDAO<Category> documentName);
+
+	public List<Category> getPrentCategories(Long categoryId);
+
+	public List<Category> getImmidiateChildCategories(Long parentCategoryId);
+
+	public List<Category> getChildCategories(Long parentCategoryId);
+
+	public Category getCategory(Long categoryId);
+
+	public List<Category> getNoNPlaceHolderChildCategories(Long parentCategoryId);
+
+	public List<Category> getAllCategories() throws SolrServerException,
+			MalformedURLException;
+
+}

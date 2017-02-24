@@ -1,0 +1,42 @@
+package com.sot.ecommerce.service.impl;
+
+
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.sbsc.fos.common.dao.GenericDAO;
+import com.sbsc.fos.order.common.OrdersVO;
+import com.sbsc.fos.persistance.OrderBillingTbDtl;
+import com.sbsc.fos.persistance.OrderProductTbDetail;
+import com.sbsc.fos.persistance.OrderTbMaster;
+
+
+
+@Service
+public class OrderproductDetailServiceImpl implements OrderproductDetailService{
+	
+	private GenericDAO<OrderProductTbDetail> dao;
+
+	@Autowired
+	public void setDAO(GenericDAO<OrderProductTbDetail> daoToSet) {
+		System.out.println("daoToSet " + daoToSet);
+		dao = daoToSet;
+		dao.setClazz(OrderProductTbDetail.class);
+	}
+
+	@Transactional
+	public void create(final OrderProductTbDetail entity)
+	{
+		dao.saveOrUpdate(entity);
+		
+	}
+
+	
+	
+}
+

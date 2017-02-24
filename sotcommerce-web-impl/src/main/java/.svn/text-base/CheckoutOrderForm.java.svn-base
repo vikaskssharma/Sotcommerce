@@ -1,0 +1,18 @@
+package com.sbsc.fos.um.common;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class CheckoutOrderForm {
+
+	List<OrderVO> orderVOList=new ArrayList<>();
+
+	public List<OrderVO> getOrderVOList() {
+		return orderVOList;
+	}
+
+	public void setOrderVOList(List<OrderVO> orderVOList) {
+		this.orderVOList = orderVOList;
+	}
+	
+}

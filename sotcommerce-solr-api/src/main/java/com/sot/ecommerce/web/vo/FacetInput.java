@@ -1,0 +1,64 @@
+package com.sot.ecommerce.web.vo;
+
+import java.util.HashMap;
+import java.util.List;
+
+public class FacetInput {
+
+	String cat_id = "";
+	String sorting="";
+	int pgno=0;
+	HashMap<String, String> priceMap = null;
+	HashMap<String, List<String>> criteriaMap = null;
+
+	List<RangeFacetVO> rangevolist = null;
+
+	public List<RangeFacetVO> getRangevolist() {
+		return rangevolist;
+	}
+
+	public String getSorting() {
+		return sorting;
+	}
+
+	public void setSorting(String sorting) {
+		this.sorting = sorting;
+	}
+
+	public int getPgno() {
+		return pgno;
+	}
+
+	public void setPgno(int pgno) {
+		this.pgno = pgno;
+	}
+
+	public void setRangevolist(List<RangeFacetVO> rangevolist) {
+		this.rangevolist = rangevolist;
+	}
+
+	public HashMap<String, List<String>> getCriteriaMap() {
+		return criteriaMap;
+	}
+
+	public void setCriteriaMap(HashMap<String, List<String>> criteriaMap) {
+		this.criteriaMap = criteriaMap;
+	}
+
+	public String getCat_id() {
+		return cat_id;
+	}
+
+	public void setCat_id(String cat_id) {
+		this.cat_id = cat_id;
+	}
+
+	public HashMap<String, String> getPriceMap() {
+		return priceMap;
+	}
+
+	public void setPriceMap(HashMap<String, String> priceMap) {
+		this.priceMap = priceMap;
+	}
+
+}

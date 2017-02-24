@@ -1,0 +1,152 @@
+/**
+ * (c) R Systems International Ltd.
+ */
+package com.sbsc.fos.category.service;
+
+import java.util.HashMap;
+import java.util.List;
+
+import com.sbsc.fos.category.commons.CategoryPlaceHolderTreeVO;
+import com.sbsc.fos.category.commons.CategoryVO;
+import com.sbsc.fos.persistance.CategoryTbMaster;
+
+/**
+ * This class provides the Services specific to class CategoryTbMaster
+ * (Category) for all the tasks related to database operations like Create,
+ * Read, Update & Delete.
+ * 
+ * @author simanchal.patra
+ * 
+ */
+public interface CategoryService {
+
+	/**
+	 * This creates a new Category in the System for the specific Store.
+	 * 
+	 * @param CategoryTbMaster
+	 *            The Category to be created.
+	 * @return The Identifier (Id) of the newly created Category.
+	 */
+	public Long create(final CategoryTbMaster CategoryTbMaster);
+
+	/**
+	 * Reads all the Categories for all the Stores present in the system.
+	 * 
+	 * @return List of all Category
+	 */
+	public List<CategoryTbMaster> findAll();
+
+	/**
+	 * Reads a specific Category from the system whose Identifies is provided.
+	 * 
+	 * @param id
+	 *            Identifier of the Category to read.
+	 * @return The Category.
+	 */
+	public CategoryTbMaster findByID(final long id);
+
+	/**
+	 * Reads all the Categories from the system which matches the provided
+	 * property.
+	 * 
+	 * @param propertyName
+	 *            Name of the field present in the persistence class
+	 *            CategoryTbMaster (Category)
+	 * @param value
+	 *            Value for that Property whose name provided in the
+	 *            propertyName.
+	 * @return List of all the Categories matches the property
+	 */
+	public List<CategoryTbMaster> findAllByProperty(final String propertyName,
+			final Object value);
+
+	/**
+	 * Reads all the Categories from the system which matches all the provided
+	 * properties.
+	 * 
+	 * @param properties
+	 *            A HashMap containing the properties and their values.
+	 * @return List of all the Categories matches all the properties
+	 */
+	public List<CategoryTbMaster> findAllByProperty(
+			final HashMap<String, Object> properties);
+
+	/**
+	 * Update a existing Category in the system with the newly provided values.
+	 * 
+	 * @param CategoryTbMaster
+	 *            The Category with updated values
+	 * @return The updated Category
+	 */
+	public CategoryTbMaster update(final CategoryTbMaster CategoryTbMaster);
+
+	/**
+	 * Soft-Deletes a Category and all its child Elements in the system.
+	 * 
+	 * @param CategoryTbMaster
+	 *            Category to be deleted
+	 */
+	public void delete(final CategoryTbMaster CategoryTbMaster);
+
+	/**
+	 * Soft-Deletes a Category and all its child Elements in the system.
+	 * 
+	 * @param CategoryTbMasterId
+	 *            Identifier of the Category to be deleted
+	 */
+	public void deleteById(final long CategoryTbMasterId);
+
+	/**
+	 * Provides all the Categories (Name, Identifier) which are place holders in
+	 * in Hierarchical order and Tree format for the specified store.
+	 * 
+	 * @param storeId
+	 *            Identifier of the Store whose Place holder Categories
+	 *            required.
+	 * @return List of place holder Categories (Name, Identifier) in
+	 *         Hierarchical order and Tree format.
+	 */
+	public List<CategoryPlaceHolderTreeVO> getPlaceHolderHierarchyTree(
+			final Long storeId);
+
+	/**
+	 * Reads all the Categories (Identifier, Name, Identifier of Parent
+	 * Category, Status only) for the specified Store.
+	 * 
+	 * @param storeId
+	 *            Identifier of the specified Store.
+	 * @return List of All the Categories belong to the specified store.
+	 */
+	public List<CategoryVO> getAllCategories(final Long storeId);
+
+	/**
+	 * Either save a new Category or update an existing Category instance,
+	 * depending upon resolution of the unsaved-value checks.
+	 * 
+	 * @param CategoryTbMaster
+	 *            Instance of the Category Saved into or Updated in the System
+	 */
+	public void saveOrUpdate(final CategoryTbMaster CategoryTbMaster);
+
+	/**
+	 * Reads all the Categories (Identifier, Name only) for the specified Store.
+	 * 
+	 * @param storeId
+	 *            Identifier of the specified Store.
+	 * @return A Map containing the Details of the all the Categories
+	 *         (Identifier, Name only) where key is the Name and Value is the
+	 *         Identifier of that Category.
+	 */
+	public HashMap<String, Long> findAllNameId(final Long storeId);
+
+	/**
+	 * Provides the no of products currently present in the system for the
+	 * specified Category.
+	 * 
+	 * @param categoryId Identifier of the Category.
+	 * 
+	 * @return Total count of products.
+	 */
+	public Integer getProductCount(final Long categoryId);
+
+}

@@ -1,0 +1,97 @@
+package com.sbsc.fos.rr.web.handler;
+
+/**
+ * @author gaurav.kumar
+ */
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.sbsc.fos.common.vo.SessionInfo;
+import com.sbsc.fos.exception.BusinessFailureException;
+import com.sbsc.fos.exception.GenericFailureException;
+import com.sbsc.fos.persistance.ReviewNRatingTbDetail;
+import com.sbsc.fos.rr.commons.ReviewRatingVO;
+import com.sbsc.fos.rr.service.ReviewService;
+import com.sbsc.fos.utils.DateUtil;
+import com.sbsc.fos.utils.SBSConstants;
+
+@Component
+public class RRHandler implements SBSConstants {
+
+	@Autowired
+	private ReviewService rrService;
+
+	public ReviewService getRrService() {
+		return rrService;
+	}
+
+	public void setRrService(ReviewService rrService) {
+		this.rrService = rrService;
+	}
+
+	/**
+	 * update review by reviewId.
+	 * 
+	 * @param reviewId
+	 *            and session info
+	 * @return List of ReviewVO object
+	 */
+	public List<ReviewRatingVO> updateReview(long id, SessionInfo sessionInfo)
+			throws BusinessFailureException, GenericFailureException {
+
+		ReviewNRatingTbDetail review = rrService.findByID(id);
+		// Updating current review variables
+		review.setVcStts(REVIEW_STATUS.Approved.toString());
+		review.setNmUpdtdBy(BigDecimal.valueOf(sessionInfo.getUserId()));
+		review.setDtUpdtdAt(DateUtil.getCurrentDateTime());
+		// Updating current review variables ends
+		rrService.update(review);
+		return getAllReviewRatings(sessionInfo);
+	}
+
+	/*
+	 * This method provides list of all reviews
+	 * 
+	 * @param session info as store id and user id
+	 */
+	public List<ReviewRatingVO> getAllReviewRatings(SessionInfo sessionInfo) {
+
+		HashMap<String, Object> properties = new HashMap<String, Object>();
+		properties.put("nmStrId", BigDecimal.valueOf(sessionInfo.getStoreId()));
+		return rrService.findReview(properties);
+	}
+
+	/*
+	 * This method provides list of all filtered reviews
+	 * 
+	 * @param session info as store id and user id and filter criteria
+	 */
+	public List<ReviewRatingVO> findAllReviewsByFilters(
+			Map<String, Object> filter_criteria, SessionInfo sessionInfo) {
+		return rrService.findAllReviewsByFilters(filter_criteria, sessionInfo);
+
+	}
+
+	/**
+	 * 
+	 * Handler Method to delete a Review from the Review List
+	 * 
+	 * @param reviewId
+	 * @return a Review List with one deleted Review
+	 * @throws BusinessFailureException
+	 */
+	public List<ReviewRatingVO> deleteReview(long reviewId,
+			SessionInfo sessionInfo) throws BusinessFailureException {
+
+		rrService.deleteById(reviewId);
+
+		return getAllReviewRatings(sessionInfo);
+	}
+
+}

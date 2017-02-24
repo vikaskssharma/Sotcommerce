@@ -1,0 +1,303 @@
+/**
+ * 
+ */
+package com.sbsc.fos.um.web.form.validator;
+
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.Errors;
+import org.springframework.validation.ValidationUtils;
+import org.springframework.validation.Validator;
+
+import com.sbsc.fos.um.web.form.UserSignUpForm;
+
+/**
+ * @author simanchal.patra
+ * 
+ */
+@Component
+public class SignUpValidator implements Validator {
+
+	private static final int USER_FIRST_NAME_MAX_LENGTH = 16;
+	private static final int USER_lAST_NAME_MAX_LENGTH = 16;
+	private static final int USER_EMAIL_MAX_LENGTH = 32;
+
+	
+	private static final int USER_PASSWORD_MAX_LENGTH = 16;
+	private static final int USER_PASSWORD_MIN_LENGTH = 8;
+	
+	private static final int USER_PHONE_LENGTH_MAX = 10;
+	private static final int USER_PHONE_LENGTH_MIN = 7;	 
+	private static final int CITY_MAX_LENGTH = 16;
+	private static final int STATE_MAX_LENGTH = 16;
+	private static final int ZIPCODE_MAX= 8;
+	private static final int ZIPCODE_MIN= 5;
+	
+	
+	
+	private static final int ZERO_LENGTH = 0;
+	
+	
+	
+
+	/*private static final String CITY_PATTERN = "^[a-zA-Z0-9 ]{1,16}$";
+
+	private static final String STATE_PATTERN = "^[a-zA-Z0-9 ]{1,16}$";*/
+
+	private static final String PHONE_PATTERN = "^[0-9]{7,10}$";
+	private static final String ZIPCODE_PATTERN = "^[0-9]{5,8}$";
+	private static final String FIRST_NAME_PATTERN = "^[a-zA-Z0-9 ]{1,16}$";
+	private static final String LAST_NAME_PATTERN = "^[a-zA-Z0-9 ]{0,16}$";
+	//private static final String ADDRESS_PATTERN = "^[a-zA-Z0-9#\", '& .()%*-]*$" ; //"^[a-zA-Z0-9]+([ \t-]?[a-zA-Z0-9]+)*$";// "^[a-zA-Z0-9]{8,128}$";
+
+	private static final String EMAIL_ID_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+			+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+
+	@Override
+	public boolean supports(Class<?> clazz) {
+		return SignUpValidator.class.isAssignableFrom(clazz);
+	}
+
+	@Override
+	public void validate(Object command, Errors errors) {
+
+		UserSignUpForm userSignUpForm = (UserSignUpForm) command;
+
+		if (StringUtils.isNotBlank(userSignUpForm.getFirstName())) {
+
+			if (userSignUpForm.getFirstName().length() > USER_FIRST_NAME_MAX_LENGTH) {
+				errors.rejectValue("firstName",
+						"signup.user.first.name.max.length"
+						);
+				
+			}
+
+			else if (!this.validatePattern(userSignUpForm.getFirstName(),
+					FIRST_NAME_PATTERN)) {
+				errors.rejectValue("firstName",
+						"signup.user.first.name.format"
+						);
+
+			}
+
+		} else {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "firstName",
+					"signup.user.first.name.blank"
+					);
+		}
+
+		if (userSignUpForm.getLastName().length() > 0) {
+
+			if (userSignUpForm.getLastName().length() > USER_lAST_NAME_MAX_LENGTH) {
+				errors.rejectValue("lastName",
+						"signup.user.last.name.max.length"
+						);
+				
+			}
+
+			else if (!this.validatePattern(userSignUpForm.getLastName(),
+					LAST_NAME_PATTERN)) {
+				errors.rejectValue("lastName",
+						"signup.user.last.name.format"
+						);
+
+			}
+			
+		}
+
+		if (StringUtils.isNotBlank(userSignUpForm.getEmailID())) {
+
+			if (userSignUpForm.getEmailID().length() > USER_EMAIL_MAX_LENGTH) {
+				errors.rejectValue("email", "signup.user.email.max.length"
+						);
+				
+			} else if (!validateEmailID(userSignUpForm.getEmailID())) {
+				errors.rejectValue("emailID", "signup.user.email.ID.format"
+						);
+			}
+
+		} else {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "emailID",
+					"signup.user.email.ID.blank");
+		}
+
+		if (StringUtils.isBlank(userSignUpForm.getAddress())) {
+
+						ValidationUtils.rejectIfEmptyOrWhitespace(errors, "address",
+					"signup.user.address.blank");
+		}
+
+		if (StringUtils.isNotBlank(userSignUpForm.getPhone())) {
+			
+			 if (!this.validatePattern(userSignUpForm.getPhone(), PHONE_PATTERN)) {
+				errors.rejectValue("phone", "signup.user.phone.format"
+						);
+			}
+			 else if (userSignUpForm.getPhone().length()> USER_PHONE_LENGTH_MAX || userSignUpForm.getPhone().length()< USER_PHONE_LENGTH_MIN ) {
+
+					errors.rejectValue("phone",
+							"signup.user.phone.length");
+					
+
+				}	
+
+		} else {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "phone",
+					"signup.user.phone.blank");
+		}
+
+		
+		if (StringUtils.isNotBlank(userSignUpForm.getCity())) {
+
+			if(userSignUpForm.getCity().length() > CITY_MAX_LENGTH)
+			{
+				errors.rejectValue("city", "signup.user.city.max"
+						);
+				
+			}
+
+		} else {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "city",
+					"signup.user.city.blank");
+		}
+
+		if (StringUtils.isNotBlank(userSignUpForm.getState())) {
+
+			if(userSignUpForm.getCity().length() > STATE_MAX_LENGTH)
+			{
+				errors.rejectValue("state", "signup.user.state.max"
+						);
+				
+			}			
+
+		} else {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "state",
+					"signup.user.state.blank");
+		}
+		
+		
+
+		if (StringUtils.isNotBlank(userSignUpForm.getZipcode())) {
+
+			 if (!this.validatePattern(userSignUpForm.getZipcode(),
+					ZIPCODE_PATTERN)) {
+
+				errors.rejectValue("zipcode", "signup.zipcode.format"
+						);
+			}
+			
+			 else if(userSignUpForm.getZipcode().length()> ZIPCODE_MAX || userSignUpForm.getZipcode().length()< ZIPCODE_MIN )
+			{
+				errors.rejectValue("zipcode", "signup.zipcode.max.length"
+						);
+				
+			}
+			
+
+			}
+		 else {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "zipcode",
+					"signup.zipcode.blank");
+		}
+		
+		
+		if ((String.valueOf(userSignUpForm.getCountryId()).equals("-1"))) {
+			
+			errors.rejectValue("countryId", "signup.country.blank");
+					
+			
+		
+		}
+		
+		
+
+		if (StringUtils.isNotBlank(userSignUpForm.getPassword())) {
+
+			if (userSignUpForm.getPassword().length() > USER_PASSWORD_MAX_LENGTH  || userSignUpForm.getPassword().length() < USER_PASSWORD_MIN_LENGTH)  {
+				errors.rejectValue("password",
+						"signup.user.password.length"
+						);
+				
+			} 
+
+		} else {
+			ValidationUtils
+					.rejectIfEmptyOrWhitespace(errors, "password",
+							"signup.user.password.blank"
+							);
+		}
+		
+		
+		
+		
+		
+
+		if (StringUtils.isNotBlank(userSignUpForm.getCnfPassword())) {
+
+			if (userSignUpForm.getCnfPassword().length() > USER_PASSWORD_MAX_LENGTH || userSignUpForm.getCnfPassword().length() < USER_PASSWORD_MIN_LENGTH) {
+				
+				errors.rejectValue("cnfPassword",
+						"signup.user.confirm.password.length"
+						);
+				return;
+				
+			} 
+
+			else if (!userSignUpForm.getCnfPassword().equals(userSignUpForm.getPassword())) {
+					errors.rejectValue("cnfPassword",
+							"signup.user.password.mismatch"
+							);
+				}
+			
+
+		} else {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "cnfPassword",
+					"signup.user.password.confirm.blank"
+					);
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+
+	}
+
+	/**
+	 * Validate hex with regular expression
+	 * 
+	 * @param hex
+	 *            hex for validation
+	 * @return true valid hex, false invalid hex
+	 */
+	public boolean validateEmailID(final String emailID) {
+		return Pattern.compile(EMAIL_ID_PATTERN).matcher(emailID).matches();
+
+	}
+
+	public boolean validatePattern(final String input, String pattern) {
+		return Pattern.compile(pattern).matcher(input).matches();
+
+	}
+
+}

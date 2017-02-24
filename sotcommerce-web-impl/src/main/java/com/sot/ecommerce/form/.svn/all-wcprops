@@ -1,0 +1,71 @@
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/SBSC/!svn/ver/1827/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/um/web/form
+END
+ChangePasswordForm.java
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svn/SBSC/!svn/ver/1825/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/um/web/form/ChangePasswordForm.java
+END
+AdminProfileForm.java
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svn/SBSC/!svn/ver/560/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/um/web/form/AdminProfileForm.java
+END
+ProfileForm.java
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svn/SBSC/!svn/ver/545/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/um/web/form/ProfileForm.java
+END
+ForgetPasswordForm.java
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svn/SBSC/!svn/ver/1826/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/um/web/form/ForgetPasswordForm.java
+END
+PaymentForm.java
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/svn/SBSC/!svn/ver/1183/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/um/web/form/PaymentForm.java
+END
+AdminDashboardForm.java
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/svn/SBSC/!svn/ver/173/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/um/web/form/AdminDashboardForm.java
+END
+BillingAddress.java
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svn/SBSC/!svn/ver/173/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/um/web/form/BillingAddress.java
+END
+UserSignUpForm.java
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/SBSC/!svn/ver/1037/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/um/web/form/UserSignUpForm.java
+END
+OrderForm.java
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/SBSC/!svn/ver/880/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/um/web/form/OrderForm.java
+END
+DeliveryAddressesForm.java
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svn/SBSC/!svn/ver/542/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/um/web/form/DeliveryAddressesForm.java
+END
+UserSignInForm.java
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/SBSC/!svn/ver/1334/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/um/web/form/UserSignInForm.java
+END

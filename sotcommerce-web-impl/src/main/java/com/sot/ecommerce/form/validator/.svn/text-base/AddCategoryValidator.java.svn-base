@@ -1,0 +1,123 @@
+/**
+ * 
+ */
+package com.sbsc.fos.category.web.form.validator;
+
+import java.util.HashMap;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.Errors;
+import org.springframework.validation.ValidationUtils;
+import org.springframework.validation.Validator;
+
+import com.sbsc.fos.category.service.CategoryService;
+import com.sbsc.fos.category.web.form.AddCategoryForm;
+import com.sbsc.fos.persistance.CategoryTbMaster;
+
+/**
+ * @author simanchal.patra
+ * 
+ */
+@Component
+public class AddCategoryValidator implements Validator {
+
+	private static final int CATEGORY_NAME_MAX_LENGTH = 32;
+
+	private static final int CATEGORY_DESCRIPTION_MAX_LENGTH = 128;
+
+	@Autowired
+	private CategoryService categoryService;
+
+	@Override
+	public boolean supports(Class<?> clazz) {
+		return AddCategoryValidator.class.isAssignableFrom(clazz);
+	}
+
+	@Override
+	public void validate(Object command, Errors errors) {
+
+		AddCategoryForm addCategoryForm = (AddCategoryForm) command;
+
+		if (StringUtils.isNotBlank(addCategoryForm.getCategoryName())) {
+
+			if (addCategoryForm.getCategoryName().length() > CATEGORY_NAME_MAX_LENGTH) {
+				errors.rejectValue("categoryName",
+						"add.category.name.max.length");
+			}
+
+			if (!StringUtils.isAlphanumericSpace(addCategoryForm
+					.getCategoryName())
+					&& !StringUtils.isAlphanumeric(addCategoryForm
+							.getCategoryName())) {
+				errors.rejectValue("categoryName",
+						"add.category.name.alpha.numeric");
+			}
+
+			HashMap<String, Long> nameIdMap = categoryService.findAllNameId(1L);
+
+			if (addCategoryForm.getCategoryId() == null) {
+
+				if (nameIdMap.get(addCategoryForm.getCategoryName().trim()
+						.toLowerCase()) != null) {
+					errors.rejectValue("categoryName",
+							"add.category.name.already.exists.for.store");
+				}
+
+			} else if (nameIdMap.get(addCategoryForm.getCategoryName().trim()
+					.toLowerCase()) != null) {
+
+				if (((Long) nameIdMap.get(addCategoryForm.getCategoryName()
+						.trim().toLowerCase())).longValue() != addCategoryForm
+						.getCategoryId()) {
+					errors.rejectValue("categoryName",
+							"add.category.name.already.exists.for.store");
+				}
+			}
+
+		} else {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "categoryName",
+					"add.category.name.blank");
+		}
+
+		if (StringUtils.isNotBlank(addCategoryForm.getDescription())) {
+
+			if (addCategoryForm.getDescription().trim().length() > CATEGORY_DESCRIPTION_MAX_LENGTH) {
+				errors.rejectValue("description",
+						"add.category.description.max.length");
+			}
+
+		}
+
+		if (StringUtils.isNotBlank(addCategoryForm.getStatus())) {
+
+			if (addCategoryForm.getStatus().equals("NONE")) {
+				errors.rejectValue("status", "add.category.status.not.selected");
+			} else if (StringUtils.equalsIgnoreCase(
+					addCategoryForm.getStatus(), "Active")) {
+				// Status 1 : Active
+				if (StringUtils.isNotBlank(addCategoryForm
+						.getParentCategoryId())
+						&& !addCategoryForm.getParentCategoryId()
+								.equals("NONE")) {
+
+					CategoryTbMaster categoryTbMaster = categoryService
+							.findByID(Long.valueOf(addCategoryForm
+									.getParentCategoryId()));
+
+					if (StringUtils.equalsIgnoreCase(
+							categoryTbMaster.getVcStts(), "InActive")) {
+						errors.rejectValue("status",
+								"add.category.status.change.to.active.not.permitted");
+					}
+				}
+			}
+
+		} else {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "status",
+					"add.category.status.blank");
+		}
+
+	}
+}

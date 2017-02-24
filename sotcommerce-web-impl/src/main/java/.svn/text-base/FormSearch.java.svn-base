@@ -1,0 +1,36 @@
+/**
+ * 
+ */
+package com.sbsc.fos.web.form;
+
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
+import com.sbsc.fos.web.form.Filter;
+
+/**
+ * @author gaurav.kumar
+ * 
+ */
+@Component
+public class FormSearch {
+
+	private List<Filter> filters;
+
+	/**
+	 * @return the filter
+	 */
+	public List<Filter> getFilters() {
+		return filters;
+	}
+
+	/**
+	 * @param filter the filter to set
+	 */
+	public void setFilters(List<Filter> filters) {
+		this.filters = filters;
+	}
+
+	
+}

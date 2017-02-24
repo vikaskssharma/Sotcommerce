@@ -1,0 +1,1092 @@
+/**
+ * 
+ */
+package com.sbsc.fos.product.web.form;
+
+import java.math.BigDecimal;
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+/**
+ * @author diksha.rattan
+ *
+ */
+/**
+ * @author diksha.rattan
+ *
+ */
+@Component
+@Scope("prototype")
+public class ProductBasicForm {
+	
+	
+	
+	private long productID = 0;	
+	
+	@NotNull
+	private String categoryId = "";		
+	
+	@NotNull
+	@Max(10)
+	private String productName = "";		
+	
+	private String productDesc = null;	
+	
+	private String status = "";	
+	
+	private String dealPrice = "";	
+	
+	private String salePrice = "";		
+	
+	private String quantity = "0" ;		
+	
+	private long expDelDate = 0;		
+	
+	private Boolean isFtrd;		
+	
+	private Boolean isCod;		
+	
+	private long storeId = 0;	
+	
+	private Boolean freeShiping;
+	
+	private Boolean isOutOfStock;
+	
+	private String prodImgPath1  = "";	
+	
+	private String prodImgPath2 = "";
+	
+	private String prodImgPath3 = "";	
+	
+	private String prodImgPath4 = "";	
+	
+	private String attribute1Val = "";	
+	
+	private String attribute2Val = "";	
+	
+	private String attribute3Val = "";	
+	
+	private String attribute4Val = "";	
+	
+	private String attribute5Val = "";	
+	
+	private String attribute6Val = "";	
+	
+	private String attribute7Val = "";	
+	
+	private String attribute8Val = "";	
+	
+	private String attribute9Val = "";	
+	
+	private String attribute10Val = "";	
+	
+	private String attribute11Val = "";
+		
+	private String attribute12Val = "";	
+	
+	private String attribute13Val = "";	
+	
+	private String attribute14Val = "";	
+	
+	private String attribute15Val = "";	
+	
+	private String attribute16Val = "";	
+	
+	private String attribute17Val = "";	
+	
+	private String attribute18Val = "";	
+	
+	private String attribute19Val = "";	
+	
+	private String attribute20Val = "";	
+	
+	private String attribute21Val = "";	
+	
+	private String attribute22Val = "";	
+	
+	private String attribute23Val = "";	
+	
+	private String attribute24Val = "";
+		
+	private String attribute25Val = "";		
+	
+	private String isCompletionStatus = "D";
+	
+	private String errorMessage = "";
+	
+	private String mode = "Add";
+	
+	private String tabVal = "";
+	
+	private Boolean isVariant;
+	
+	private long createdBy = 0;
+	
+	private long updatedBy = 0;
+	
+	private Date createdAt = null;
+	
+	private String nmAttrValue1 = "";
+	
+	private String nmAttrValue2 = "";
+	
+	private String nmAttrValue3 = "";
+	
+	private String nmAttrValue4 = "";
+	
+	private String nmAttrValue5 = "";
+	
+	private String attrUnitValue1;
+	
+	private String attrUnitValue2;
+	
+	private String attrUnitValue3;
+	
+	private String attrUnitValue4;
+	
+	private String attrUnitValue5;
+	
+	private Boolean isVariantAdded;
+	
+	private Boolean isAllImageDeleted;
+	
+	private Boolean isVariantOutOfStock;
+	
+	private Boolean isVariantInActive;
+	
+	
+
+	/**
+	 * @return the isAllImageDeleted
+	 */
+	public Boolean getIsAllImageDeleted() {
+		return isAllImageDeleted;
+	}
+
+	/**
+	 * @param isAllImageDeleted the isAllImageDeleted to set
+	 */
+	public void setIsAllImageDeleted(Boolean isAllImageDeleted) {
+		this.isAllImageDeleted = isAllImageDeleted;
+	}
+
+	/**
+	 * @return the createdBy
+	 */
+	public long getCreatedBy() {
+		return createdBy;
+	}
+
+	/**
+	 * @param createdBy the createdBy to set
+	 */
+	public void setCreatedBy(long createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	/**
+	 * @return the updatedBy
+	 */
+	public long getUpdatedBy() {
+		return updatedBy;
+	}
+
+	/**
+	 * @param updatedBy the updatedBy to set
+	 */
+	public void setUpdatedBy(long updatedBy) {
+		this.updatedBy = updatedBy;
+	}
+
+	/**
+	 * @return the productID
+	 */
+	public long getProductID() {
+		return productID;
+	}
+
+	/**
+	 * @param productID the productID to set
+	 */
+	public void setProductID(long productID) {
+		this.productID = productID;
+	}
+
+	/**
+	 * @return the categoryId
+	 */
+	public String getCategoryId() {
+		return categoryId;
+	}
+
+	/**
+	 * @param categoryId the categoryId to set
+	 */
+	public void setCategoryId(String categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	/**
+	 * @return the productName
+	 */
+	public String getProductName() {
+		return productName;
+	}
+
+	/**
+	 * @param productName the productName to set
+	 */
+	public void setProductName(String productName) {
+		this.productName = productName;
+	}
+
+	/**
+	 * @return the productDesc
+	 */
+	public String getProductDesc() {
+		return productDesc;
+	}
+
+	/**
+	 * @param productDesc the productDesc to set
+	 */
+	public void setProductDesc(String productDesc) {
+		this.productDesc = productDesc;
+	}
+
+	/**
+	 * @return the status
+	 */
+	public String getStatus() {
+		return status;
+	}
+
+	/**
+	 * @param status the status to set
+	 */
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	
+	/**
+	 * @return the dealPrice
+	 */
+	public String getDealPrice() {
+		return dealPrice;
+	}
+
+	/**
+	 * @param dealPrice the dealPrice to set
+	 */
+	public void setDealPrice(String dealPrice) {
+		this.dealPrice = dealPrice;
+	}
+
+	/**
+	 * @return the salePrice
+	 */
+	public String getSalePrice() {
+		return salePrice;
+	}
+
+	/**
+	 * @param salePrice the salePrice to set
+	 */
+	public void setSalePrice(String salePrice) {
+		this.salePrice = salePrice;
+	}
+
+	
+
+	/**
+	 * @return the quantity
+	 */
+	public String getQuantity() {
+		return quantity;
+	}
+
+	/**
+	 * @param quantity the quantity to set
+	 */
+	public void setQuantity(String quantity) {
+		this.quantity = quantity;
+	}
+
+	/**
+	 * @return the expDelDate
+	 */
+	public long getExpDelDate() {
+		return expDelDate;
+	}
+
+	/**
+	 * @param expDelDate the expDelDate to set
+	 */
+	public void setExpDelDate(long expDelDate) {
+		this.expDelDate = expDelDate;
+	}
+
+	
+	/**
+	 * @return the storeId
+	 */
+	public long getStoreId() {
+		return storeId;
+	}
+
+	/**
+	 * @param storeId the storeId to set
+	 */
+	public void setStoreId(long storeId) {
+		this.storeId = storeId;
+	}
+
+	
+	/**
+	 * @return the prodImgPath1
+	 */
+	public String getProdImgPath1() {
+		return prodImgPath1;
+	}
+
+	/**
+	 * @param prodImgPath1 the prodImgPath1 to set
+	 */
+	public void setProdImgPath1(String prodImgPath1) {
+		this.prodImgPath1 = prodImgPath1;
+	}
+
+	/**
+	 * @return the prodImgPath2
+	 */
+	public String getProdImgPath2() {
+		return prodImgPath2;
+	}
+
+	/**
+	 * @param prodImgPath2 the prodImgPath2 to set
+	 */
+	public void setProdImgPath2(String prodImgPath2) {
+		this.prodImgPath2 = prodImgPath2;
+	}
+
+	/**
+	 * @return the prodImgPath3
+	 */
+	public String getProdImgPath3() {
+		return prodImgPath3;
+	}
+
+	/**
+	 * @param prodImgPath3 the prodImgPath3 to set
+	 */
+	public void setProdImgPath3(String prodImgPath3) {
+		this.prodImgPath3 = prodImgPath3;
+	}
+
+	/**
+	 * @return the prodImgPath4
+	 */
+	public String getProdImgPath4() {
+		return prodImgPath4;
+	}
+
+	/**
+	 * @param prodImgPath4 the prodImgPath4 to set
+	 */
+	public void setProdImgPath4(String prodImgPath4) {
+		this.prodImgPath4 = prodImgPath4;
+	}
+
+	/**
+	 * @return the attribute1Val
+	 */
+	public String getAttribute1Val() {
+		return attribute1Val;
+	}
+
+	/**
+	 * @param attribute1Val the attribute1Val to set
+	 */
+	public void setAttribute1Val(String attribute1Val) {
+		this.attribute1Val = attribute1Val;
+	}
+
+	/**
+	 * @return the attribute2Val
+	 */
+	public String getAttribute2Val() {
+		return attribute2Val;
+	}
+
+	/**
+	 * @param attribute2Val the attribute2Val to set
+	 */
+	public void setAttribute2Val(String attribute2Val) {
+		this.attribute2Val = attribute2Val;
+	}
+
+	/**
+	 * @return the attribute3Val
+	 */
+	public String getAttribute3Val() {
+		return attribute3Val;
+	}
+
+	/**
+	 * @param attribute3Val the attribute3Val to set
+	 */
+	public void setAttribute3Val(String attribute3Val) {
+		this.attribute3Val = attribute3Val;
+	}
+
+	/**
+	 * @return the attribute4Val
+	 */
+	public String getAttribute4Val() {
+		return attribute4Val;
+	}
+
+	/**
+	 * @param attribute4Val the attribute4Val to set
+	 */
+	public void setAttribute4Val(String attribute4Val) {
+		this.attribute4Val = attribute4Val;
+	}
+
+	/**
+	 * @return the attribute5Val
+	 */
+	public String getAttribute5Val() {
+		return attribute5Val;
+	}
+
+	/**
+	 * @param attribute5Val the attribute5Val to set
+	 */
+	public void setAttribute5Val(String attribute5Val) {
+		this.attribute5Val = attribute5Val;
+	}
+
+	/**
+	 * @return the attribute6Val
+	 */
+	public String getAttribute6Val() {
+		return attribute6Val;
+	}
+
+	/**
+	 * @param attribute6Val the attribute6Val to set
+	 */
+	public void setAttribute6Val(String attribute6Val) {
+		this.attribute6Val = attribute6Val;
+	}
+
+	/**
+	 * @return the attribute7Val
+	 */
+	public String getAttribute7Val() {
+		return attribute7Val;
+	}
+
+	/**
+	 * @param attribute7Val the attribute7Val to set
+	 */
+	public void setAttribute7Val(String attribute7Val) {
+		this.attribute7Val = attribute7Val;
+	}
+
+	/**
+	 * @return the attribute8Val
+	 */
+	public String getAttribute8Val() {
+		return attribute8Val;
+	}
+
+	/**
+	 * @param attribute8Val the attribute8Val to set
+	 */
+	public void setAttribute8Val(String attribute8Val) {
+		this.attribute8Val = attribute8Val;
+	}
+
+	/**
+	 * @return the attribute9Val
+	 */
+	public String getAttribute9Val() {
+		return attribute9Val;
+	}
+
+	/**
+	 * @param attribute9Val the attribute9Val to set
+	 */
+	public void setAttribute9Val(String attribute9Val) {
+		this.attribute9Val = attribute9Val;
+	}
+
+	/**
+	 * @return the attribute10Val
+	 */
+	public String getAttribute10Val() {
+		return attribute10Val;
+	}
+
+	/**
+	 * @param attribute10Val the attribute10Val to set
+	 */
+	public void setAttribute10Val(String attribute10Val) {
+		this.attribute10Val = attribute10Val;
+	}
+
+	/**
+	 * @return the attribute11Val
+	 */
+	public String getAttribute11Val() {
+		return attribute11Val;
+	}
+
+	/**
+	 * @param attribute11Val the attribute11Val to set
+	 */
+	public void setAttribute11Val(String attribute11Val) {
+		this.attribute11Val = attribute11Val;
+	}
+
+	/**
+	 * @return the attribute12Val
+	 */
+	public String getAttribute12Val() {
+		return attribute12Val;
+	}
+
+	/**
+	 * @param attribute12Val the attribute12Val to set
+	 */
+	public void setAttribute12Val(String attribute12Val) {
+		this.attribute12Val = attribute12Val;
+	}
+
+	/**
+	 * @return the attribute13Val
+	 */
+	public String getAttribute13Val() {
+		return attribute13Val;
+	}
+
+	/**
+	 * @param attribute13Val the attribute13Val to set
+	 */
+	public void setAttribute13Val(String attribute13Val) {
+		this.attribute13Val = attribute13Val;
+	}
+
+	/**
+	 * @return the attribute14Val
+	 */
+	public String getAttribute14Val() {
+		return attribute14Val;
+	}
+
+	/**
+	 * @param attribute14Val the attribute14Val to set
+	 */
+	public void setAttribute14Val(String attribute14Val) {
+		this.attribute14Val = attribute14Val;
+	}
+
+	/**
+	 * @return the attribute15Val
+	 */
+	public String getAttribute15Val() {
+		return attribute15Val;
+	}
+
+	/**
+	 * @param attribute15Val the attribute15Val to set
+	 */
+	public void setAttribute15Val(String attribute15Val) {
+		this.attribute15Val = attribute15Val;
+	}
+
+	/**
+	 * @return the attribute16Val
+	 */
+	public String getAttribute16Val() {
+		return attribute16Val;
+	}
+
+	/**
+	 * @param attribute16Val the attribute16Val to set
+	 */
+	public void setAttribute16Val(String attribute16Val) {
+		this.attribute16Val = attribute16Val;
+	}
+
+	/**
+	 * @return the attribute17Val
+	 */
+	public String getAttribute17Val() {
+		return attribute17Val;
+	}
+
+	/**
+	 * @param attribute17Val the attribute17Val to set
+	 */
+	public void setAttribute17Val(String attribute17Val) {
+		this.attribute17Val = attribute17Val;
+	}
+
+	/**
+	 * @return the attribute18Val
+	 */
+	public String getAttribute18Val() {
+		return attribute18Val;
+	}
+
+	/**
+	 * @param attribute18Val the attribute18Val to set
+	 */
+	public void setAttribute18Val(String attribute18Val) {
+		this.attribute18Val = attribute18Val;
+	}
+
+	/**
+	 * @return the attribute19Val
+	 */
+	public String getAttribute19Val() {
+		return attribute19Val;
+	}
+
+	/**
+	 * @param attribute19Val the attribute19Val to set
+	 */
+	public void setAttribute19Val(String attribute19Val) {
+		this.attribute19Val = attribute19Val;
+	}
+
+	/**
+	 * @return the attribute20Val
+	 */
+	public String getAttribute20Val() {
+		return attribute20Val;
+	}
+
+	/**
+	 * @param attribute20Val the attribute20Val to set
+	 */
+	public void setAttribute20Val(String attribute20Val) {
+		this.attribute20Val = attribute20Val;
+	}
+
+	/**
+	 * @return the attribute21Val
+	 */
+	public String getAttribute21Val() {
+		return attribute21Val;
+	}
+
+	/**
+	 * @param attribute21Val the attribute21Val to set
+	 */
+	public void setAttribute21Val(String attribute21Val) {
+		this.attribute21Val = attribute21Val;
+	}
+
+	/**
+	 * @return the attribute22Val
+	 */
+	public String getAttribute22Val() {
+		return attribute22Val;
+	}
+
+	/**
+	 * @param attribute22Val the attribute22Val to set
+	 */
+	public void setAttribute22Val(String attribute22Val) {
+		this.attribute22Val = attribute22Val;
+	}
+
+	/**
+	 * @return the attribute23Val
+	 */
+	public String getAttribute23Val() {
+		return attribute23Val;
+	}
+
+	/**
+	 * @param attribute23Val the attribute23Val to set
+	 */
+	public void setAttribute23Val(String attribute23Val) {
+		this.attribute23Val = attribute23Val;
+	}
+
+	/**
+	 * @return the attribute24Val
+	 */
+	public String getAttribute24Val() {
+		return attribute24Val;
+	}
+
+	/**
+	 * @param attribute24Val the attribute24Val to set
+	 */
+	public void setAttribute24Val(String attribute24Val) {
+		this.attribute24Val = attribute24Val;
+	}
+
+	/**
+	 * @return the attribute25Val
+	 */
+	public String getAttribute25Val() {
+		return attribute25Val;
+	}
+
+	/**
+	 * @param attribute25Val the attribute25Val to set
+	 */
+	public void setAttribute25Val(String attribute25Val) {
+		this.attribute25Val = attribute25Val;
+	}
+
+	/**
+	 * @return the isCompletionStatus
+	 */
+	public String getIsCompletionStatus() {
+		return isCompletionStatus;
+	}
+
+	/**
+	 * @param isCompletionStatus the isCompletionStatus to set
+	 */
+	public void setIsCompletionStatus(String isCompletionStatus) {
+		this.isCompletionStatus = isCompletionStatus;
+	}
+
+	/**
+	 * @return the errorMessage
+	 */
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	/**
+	 * @param errorMessage the errorMessage to set
+	 */
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+
+	/**
+	 * @return the mode
+	 */
+	public String getMode() {
+		return mode;
+	}
+
+	/**
+	 * @param mode the mode to set
+	 */
+	public void setMode(String mode) {
+		this.mode = mode;
+	}
+
+	
+	/**
+	 * @return the tabVal
+	 */
+	public String getTabVal() {
+		return tabVal;
+	}
+
+	/**
+	 * @param tabVal the tabVal to set
+	 */
+	public void setTabVal(String tabVal) {
+		this.tabVal = tabVal;
+	}
+
+	/**
+	 * @return the createdAt
+	 */
+	
+	public Date getCreatedAt() {
+		return createdAt;
+	}
+
+	/**
+	 * @param createdAt the createdAt to set
+	 */
+	public void setCreatedAt(Date createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	/**
+	 * @return the nmAttrValue1
+	 */
+	public String getNmAttrValue1() {
+		return nmAttrValue1;
+	}
+
+	/**
+	 * @param nmAttrValue1 the nmAttrValue1 to set
+	 */
+	public void setNmAttrValue1(String nmAttrValue1) {
+		this.nmAttrValue1 = nmAttrValue1;
+	}
+
+	/**
+	 * @return the nmAttrValue2
+	 */
+	public String getNmAttrValue2() {
+		return nmAttrValue2;
+	}
+
+	/**
+	 * @param nmAttrValue2 the nmAttrValue2 to set
+	 */
+	public void setNmAttrValue2(String nmAttrValue2) {
+		this.nmAttrValue2 = nmAttrValue2;
+	}
+
+	/**
+	 * @return the nmAttrValue3
+	 */
+	public String getNmAttrValue3() {
+		return nmAttrValue3;
+	}
+
+	/**
+	 * @param nmAttrValue3 the nmAttrValue3 to set
+	 */
+	public void setNmAttrValue3(String nmAttrValue3) {
+		this.nmAttrValue3 = nmAttrValue3;
+	}
+
+	/**
+	 * @return the nmAttrValue4
+	 */
+	public String getNmAttrValue4() {
+		return nmAttrValue4;
+	}
+
+	/**
+	 * @param nmAttrValue4 the nmAttrValue4 to set
+	 */
+	public void setNmAttrValue4(String nmAttrValue4) {
+		this.nmAttrValue4 = nmAttrValue4;
+	}
+
+	/**
+	 * @return the nmAttrValue5
+	 */
+	public String getNmAttrValue5() {
+		return nmAttrValue5;
+	}
+
+	/**
+	 * @param nmAttrValue5 the nmAttrValue5 to set
+	 */
+	public void setNmAttrValue5(String nmAttrValue5) {
+		this.nmAttrValue5 = nmAttrValue5;
+	}
+
+	/**
+	 * @return the attrUnitValue1
+	 */
+	public String getAttrUnitValue1() {
+		return attrUnitValue1;
+	}
+
+	/**
+	 * @param attrUnitValue1 the attrUnitValue1 to set
+	 */
+	public void setAttrUnitValue1(String attrUnitValue1) {
+		this.attrUnitValue1 = attrUnitValue1;
+	}
+
+	/**
+	 * @return the attrUnitValue2
+	 */
+	public String getAttrUnitValue2() {
+		return attrUnitValue2;
+	}
+
+	/**
+	 * @param attrUnitValue2 the attrUnitValue2 to set
+	 */
+	public void setAttrUnitValue2(String attrUnitValue2) {
+		this.attrUnitValue2 = attrUnitValue2;
+	}
+
+	/**
+	 * @return the attrUnitValue3
+	 */
+	public String getAttrUnitValue3() {
+		return attrUnitValue3;
+	}
+
+	/**
+	 * @param attrUnitValue3 the attrUnitValue3 to set
+	 */
+	public void setAttrUnitValue3(String attrUnitValue3) {
+		this.attrUnitValue3 = attrUnitValue3;
+	}
+
+	/**
+	 * @return the attrUnitValue4
+	 */
+	public String getAttrUnitValue4() {
+		return attrUnitValue4;
+	}
+
+	/**
+	 * @param attrUnitValue4 the attrUnitValue4 to set
+	 */
+	public void setAttrUnitValue4(String attrUnitValue4) {
+		this.attrUnitValue4 = attrUnitValue4;
+	}
+
+	/**
+	 * @return the attrUnitValue5
+	 */
+	public String getAttrUnitValue5() {
+		return attrUnitValue5;
+	}
+
+	/**
+	 * @param attrUnitValue5 the attrUnitValue5 to set
+	 */
+	public void setAttrUnitValue5(String attrUnitValue5) {
+		this.attrUnitValue5 = attrUnitValue5;
+	}
+
+	/**
+	 * @return the isFtrd
+	 */
+	public Boolean getIsFtrd() {
+		return isFtrd;
+	}
+
+	/**
+	 * @param isFtrd the isFtrd to set
+	 */
+	public void setIsFtrd(Boolean isFtrd) {
+		this.isFtrd = isFtrd;
+	}
+
+	/**
+	 * @return the isCod
+	 */
+	public Boolean getIsCod() {
+		return isCod;
+	}
+
+	/**
+	 * @param isCod the isCod to set
+	 */
+	public void setIsCod(Boolean isCod) {
+		this.isCod = isCod;
+	}
+
+	/**
+	 * @return the freeShiping
+	 */
+	public Boolean getFreeShiping() {
+		return freeShiping;
+	}
+
+	/**
+	 * @param freeShiping the freeShiping to set
+	 */
+	public void setFreeShiping(Boolean freeShiping) {
+		this.freeShiping = freeShiping;
+	}
+
+	/**
+	 * @return the isOutOfStock
+	 */
+	public Boolean getIsOutOfStock() {
+		return isOutOfStock;
+	}
+
+	/**
+	 * @param isOutOfStock the isOutOfStock to set
+	 */
+	public void setIsOutOfStock(Boolean isOutOfStock) {
+		this.isOutOfStock = isOutOfStock;
+	}
+
+	/**
+	 * @return the isVariant
+	 */
+	public Boolean getIsVariant() {
+		return isVariant;
+	}
+
+	/**
+	 * @param isVariant the isVariant to set
+	 */
+	public void setIsVariant(Boolean isVariant) {
+		this.isVariant = isVariant;
+	}
+
+	/**
+	 * @return the isVariantAdded
+	 */
+	public Boolean getIsVariantAdded() {
+		return isVariantAdded;
+	}
+
+	/**
+	 * @param isVariantAdded the isVariantAdded to set
+	 */
+	public void setIsVariantAdded(Boolean isVariantAdded) {
+		this.isVariantAdded = isVariantAdded;
+	}
+
+	/**
+	 * @return the isVariantOutOfStock
+	 */
+	public Boolean getIsVariantOutOfStock() {
+		return isVariantOutOfStock;
+	}
+
+	/**
+	 * @param isVariantOutOfStock the isVariantOutOfStock to set
+	 */
+	public void setIsVariantOutOfStock(Boolean isVariantOutOfStock) {
+		this.isVariantOutOfStock = isVariantOutOfStock;
+	}
+
+	/**
+	 * @return the isVariantInActive
+	 */
+	public Boolean getIsVariantInActive() {
+		return isVariantInActive;
+	}
+
+	/**
+	 * @param isVariantInActive the isVariantInActive to set
+	 */
+	public void setIsVariantInActive(Boolean isVariantInActive) {
+		this.isVariantInActive = isVariantInActive;
+	}	
+	
+	
+
+		
+
+
+		
+
+}

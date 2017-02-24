@@ -1,0 +1,25 @@
+package com.sbsc.fos.taxation.service;
+
+/**
+ * 
+ * @author gaurav.kumar
+ */
+
+import java.util.HashMap;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.sbsc.fos.persistance.TaxationTbDetail;
+
+
+
+@Service
+public interface TaxationService {
+	
+	public List<TaxationTbDetail> findAllByProperty(HashMap<String, Object> propertiesMap);
+	
+	public boolean updateTaxation(TaxationTbDetail txn) ;
+
+	
+}

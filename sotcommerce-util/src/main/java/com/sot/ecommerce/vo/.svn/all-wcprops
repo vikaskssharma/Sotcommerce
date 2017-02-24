@@ -1,0 +1,113 @@
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/SBSC/!svn/ver/1885/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/store/web/vo
+END
+FacetVO.java
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/SBSC/!svn/ver/1817/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/store/web/vo/FacetVO.java
+END
+Product.java
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/SBSC/!svn/ver/1885/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/store/web/vo/Product.java
+END
+AdvanceSearchForm.java
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svn/SBSC/!svn/ver/1878/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/store/web/vo/AdvanceSearchForm.java
+END
+Section.java
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/SBSC/!svn/ver/1106/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/store/web/vo/Section.java
+END
+FacetAttribute.java
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/SBSC/!svn/ver/199/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/store/web/vo/FacetAttribute.java
+END
+SimilarProduct.java
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svn/SBSC/!svn/ver/1106/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/store/web/vo/SimilarProduct.java
+END
+Store.java
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/SBSC/!svn/ver/1106/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/store/web/vo/Store.java
+END
+Category.java
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/SBSC/!svn/ver/1106/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/store/web/vo/Category.java
+END
+Rating.java
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svn/SBSC/!svn/ver/1106/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/store/web/vo/Rating.java
+END
+FieldStatistics.java
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/svn/SBSC/!svn/ver/1212/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/store/web/vo/FieldStatistics.java
+END
+Attribute.java
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svn/SBSC/!svn/ver/1693/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/store/web/vo/Attribute.java
+END
+ProductImagableVariantData.java
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/svn/SBSC/!svn/ver/1806/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/store/web/vo/ProductImagableVariantData.java
+END
+Review.java
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svn/SBSC/!svn/ver/1106/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/store/web/vo/Review.java
+END
+FacetOutput.java
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svn/SBSC/!svn/ver/1817/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/store/web/vo/FacetOutput.java
+END
+ProductVariant.java
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svn/SBSC/!svn/ver/1502/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/store/web/vo/ProductVariant.java
+END
+VariantProductData.java
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svn/SBSC/!svn/ver/1806/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/store/web/vo/VariantProductData.java
+END
+FacetInput.java
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/svn/SBSC/!svn/ver/1843/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/store/web/vo/FacetInput.java
+END
+RangeFacetVO.java
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svn/SBSC/!svn/ver/1817/SDLC/Source%20Code/trunk/sbsc-fos/src/main/java/com/sbsc/fos/store/web/vo/RangeFacetVO.java
+END

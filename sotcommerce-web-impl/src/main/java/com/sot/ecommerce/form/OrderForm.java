@@ -1,0 +1,76 @@
+package com.sot.ecommerce.form;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
+import com.sbsc.fos.um.common.ProductOrderVO;
+
+@Component
+public class OrderForm {
+
+	String orderId;
+	List<ProductOrderVO> orderList = new ArrayList<>();
+	BigDecimal totalCost;
+	BigDecimal totalNetCost;
+	BigDecimal discount;
+	long quantityList[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
+
+	public List<ProductOrderVO> getOrderList() {
+		return orderList;
+	}
+
+	public void setOrderList(List<ProductOrderVO> orderList) {
+		this.orderList = orderList;
+	}
+
+	public BigDecimal getTotalCost() {
+		return totalCost;
+	}
+
+	public void setTotalCost(BigDecimal totalCost) {
+		this.totalCost = totalCost;
+	}
+
+	public BigDecimal getTotalNetCost() {
+		return totalNetCost;
+	}
+
+	public void setTotalNetCost(BigDecimal totalNetCost) {
+		this.totalNetCost = totalNetCost;
+	}
+
+	public BigDecimal getDiscount() {
+		return discount;
+	}
+
+	public void setDiscount(BigDecimal discount) {
+		this.discount = discount;
+	}
+
+	public long[] getQuantityList() {
+		return quantityList;
+	}
+
+	public void setQuantityList(long[] quantityList) {
+		this.quantityList = quantityList;
+	}
+
+	/**
+	 * @return the orderId
+	 */
+	public String getOrderId() {
+		return orderId;
+	}
+
+	/**
+	 * @param orderId
+	 *            the orderId to set
+	 */
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
+	}
+
+}

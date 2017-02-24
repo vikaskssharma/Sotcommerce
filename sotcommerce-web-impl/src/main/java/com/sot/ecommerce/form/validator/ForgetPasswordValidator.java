@@ -1,0 +1,79 @@
+package com.sot.ecommerce.form.validator;
+
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.Errors;
+import org.springframework.validation.ValidationUtils;
+import org.springframework.validation.Validator;
+
+import com.sbsc.fos.exception.BusinessFailureException;
+import com.sbsc.fos.exception.GenericFailureException;
+import com.sbsc.fos.um.web.form.ForgetPasswordForm;
+import com.sbsc.fos.um.web.form.UserSignUpForm;
+import com.sbsc.fos.um.web.handler.AdminDashboardHandler;
+
+
+@Component
+public class ForgetPasswordValidator implements Validator {
+
+	
+	private static final String EMAIL_ID_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+			+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+	private static final int USER_EMAIL_MAX_LENGTH = 32;
+	@Autowired
+	private AdminDashboardHandler adminHandler;
+	
+	@Override
+	public boolean supports(Class<?> clazz) {
+		return ForgetPasswordValidator.class.isAssignableFrom(clazz);
+	}
+
+	@Override
+	public void validate(Object command, Errors errors) {
+
+
+
+		ForgetPasswordForm forgetPasswordForm = (ForgetPasswordForm) command;
+
+		
+		if (StringUtils.isNotBlank(forgetPasswordForm.getEmail())) {
+
+			 if (!validateEmailID(forgetPasswordForm.getEmail())) {
+				errors.rejectValue("email", "user.forget.password.email.ID.format"
+						);
+			} else
+				try {
+					if((adminHandler.isUserExist(forgetPasswordForm.getEmail(),forgetPasswordForm.getRole())==null))
+					 {
+						errors.rejectValue("email", "user.forget.password.user.notexist"
+								);
+						 
+					 }
+				} catch (GenericFailureException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (BusinessFailureException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+		} else {
+			errors.rejectValue("email","user.forget.password.email.ID.blank","email blank");
+			
+		}
+
+		
+		
+		
+	}
+	
+	public boolean validateEmailID(final String email) {
+		return Pattern.compile(EMAIL_ID_PATTERN).matcher(email).matches();
+
+	}
+	
+
+}

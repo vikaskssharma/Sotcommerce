@@ -1,0 +1,283 @@
+/**
+ * 
+ */
+package com.sot.ecommerce.form.validator;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.Errors;
+import org.springframework.validation.ValidationUtils;
+import org.springframework.validation.Validator;
+
+import com.sbsc.fos.nls.web.form.AddNewsLetterForm;
+import com.sbsc.fos.utils.DateUtil;
+import com.sbsc.fos.utils.SBSConstants;
+
+/**
+ * @author abhishek.vishnoi
+ * 
+ */
+@Component
+public class NewsLetterFormValidator implements Validator {
+
+	private static final int TITLE_MAX_LENTGH = 256;
+
+	private static final int DESCR_MAX_LENGTH = 512;
+
+	private static final long FILE_MAX_SIZE = 524288;
+
+	private static final String SPECIAL_CHAR = "^[a-zA-Z0-9#& ._()%+-]*$";
+	
+	private static final String SPECIAL_CHAR_TTL = "^[a-zA-Z0-9 -]*$";
+
+	private static final String EMAIL_ID_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+			+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+
+	@Override
+	public boolean supports(Class<?> clazz) {
+		return NewsLetterFormValidator.class.isAssignableFrom(clazz);
+	}
+
+	@Override
+	public void validate(Object command, Errors errors) {
+
+		AddNewsLetterForm newsLetterForm = (AddNewsLetterForm) command;
+
+		SimpleDateFormat view_date_format = new SimpleDateFormat(
+				SBSConstants.DATE_MM_DD_YYYY);
+
+		/**
+		 * 
+		 * Validaton for max size and not empty
+		 * 
+		 */
+		if (StringUtils.isNotBlank(newsLetterForm.getNwsLttrTtl())) {
+
+			// Validation for max length of Title.
+			if (newsLetterForm.getNwsLttrTtl().length() > TITLE_MAX_LENTGH) {
+
+				errors.rejectValue("nwsLttrTtl", "newsletter.subject.max.length");
+
+			}
+			// Validation for special characters.
+			else if (!this.validatePattern(newsLetterForm.getNwsLttrTtl(),
+					SPECIAL_CHAR_TTL)) {
+				errors.rejectValue(
+						"nwsLttrTtl",
+						"newsLetter.subject.format");
+
+			}
+
+		} else {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "nwsLttrTtl",
+					"newsLetter.subject.blank");
+		}
+
+		/**
+		 * 
+		 * Validaton for max size and not empty
+		 * 
+		 */
+		if (StringUtils.isNotBlank(newsLetterForm.getNwsLttrDescr())) {
+			// Validation for max length of Description.
+			if (newsLetterForm.getNwsLttrDescr().length() > DESCR_MAX_LENGTH) {
+				errors.rejectValue("nwsLttrDescr", "newsLetter.description.max.length");
+			}
+			// Validation for special characters.
+			/*else if (!this.validatePattern(newsLetterForm.getNwsLttrDescr(),
+					SPECIAL_CHAR)) {
+				errors.rejectValue(
+						"nwsLttrDescr",
+						"newsLetterForm.nwsLttrDescr.format",
+						"Newsletter Description should contain only alphanumeric characters along with # & . _ ( ) % + - symbols");
+
+			}*/
+
+		} else {
+			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "nwsLttrDescr", "newsLetter.description.blank");
+		}
+
+		/**
+		 * 
+		 * Validation for file size
+		 * 
+		 */
+	if(newsLetterForm.getMode() == 0) // For Add Mode & skipped for edit mode
+	{
+			
+		
+		if(StringUtils.isNotBlank(newsLetterForm.getFileData()
+				.getOriginalFilename()))
+		{
+			// Validations to Max file size of image to be uploaded.
+			/*if (newsLetterForm.getFileData().getSize() > FILE_MAX_SIZE) {
+				errors.rejectValue("fileData", "newsLetter.file.max.size");
+		}*/
+		if((newsLetterForm.getFileData().getSize() <= 0))
+					{
+						errors.rejectValue("fileData", "newsLetter.fileData.empty");
+					}
+
+		} else {
+			errors.rejectValue("fileData", "newsLetter.fileData.empty");
+		}
+		
+		
+	}
+	if (StringUtils.isNotBlank(newsLetterForm.getFileData()
+			.getOriginalFilename())) {
+
+		// Validations for image extensions.
+		if (newsLetterForm.getFileData().getOriginalFilename()
+				.endsWith(".jpg")
+				|| newsLetterForm.getFileData().getOriginalFilename()
+						.endsWith(".JPG")) {
+
+		
+		} else if (newsLetterForm.getFileData().getOriginalFilename()
+				.endsWith(".jpeg")
+				|| newsLetterForm.getFileData().getOriginalFilename()
+						.endsWith(".JPEG")) {
+
+		
+
+		} else if (newsLetterForm.getFileData().getOriginalFilename()
+				.endsWith(".png")
+				|| newsLetterForm.getFileData().getOriginalFilename()
+						.endsWith(".PNG")) {
+		
+		} else {
+			
+			errors.rejectValue("fileData", "newsLetter.file.type");
+		}
+
+	}
+	else
+		// For Edit Mode
+		{
+			
+			if (newsLetterForm.getFileData().getSize() > FILE_MAX_SIZE) {
+				errors.rejectValue("fileData", "newsLetter.file.max.size");
+		}
+			
+			
+		}
+		
+		
+		
+		
+		/**
+		 * 
+		 * Validation for file type
+		 * 
+		 * 
+		 */
+		/*if (StringUtils.isNotBlank(newsLetterForm.getFileData()
+				.getOriginalFilename())) {
+
+			// Validations for image extensions.
+			if (newsLetterForm.getFileData().getOriginalFilename()
+					.endsWith(".jpg")
+					|| newsLetterForm.getFileData().getOriginalFilename()
+							.endsWith(".JPG")) {
+
+			
+			} else if (newsLetterForm.getFileData().getOriginalFilename()
+					.endsWith(".jpeg")
+					|| newsLetterForm.getFileData().getOriginalFilename()
+							.endsWith(".JPEG")) {
+
+			
+
+			} else if (newsLetterForm.getFileData().getOriginalFilename()
+					.endsWith(".png")
+					|| newsLetterForm.getFileData().getOriginalFilename()
+							.endsWith(".PNG")) {
+			
+			} else {
+				
+				errors.rejectValue("fileData", "newsLetter.file.type");
+			}
+
+		}
+*/
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		/**
+		 * Validation for Date
+		 */
+		if (StringUtils.isBlank(newsLetterForm.getPublishDate())) {
+
+			errors.rejectValue("publishDate", "newsLetter.publishDate.empty");
+		} else {
+			Date publishDate = null;
+
+			try {
+
+				publishDate = view_date_format.parse(newsLetterForm
+						.getPublishDate());
+
+				if (publishDate.compareTo(new Date()) < 0) {
+
+					// Validation for Current Date.
+					if (newsLetterForm.getPublishDate().equals(
+							DateUtil.getCurrentDate())) {
+
+					}
+					// Validation for dates before Current Date.
+					else {
+						errors.rejectValue("publishDate",
+								"newsletter.publishDate.before.current.date");
+					}
+
+				}
+
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				
+				errors.rejectValue("publishDate",
+						"newsletter.publishDate.incorrect.format");
+				
+			}
+
+		}
+	}
+
+	/**
+	 * Validate hex with regular expression
+	 * 
+	 * @param hex
+	 *            hex for validation
+	 * @return true valid hex, false invalid hex
+	 */
+	public boolean validateEmailID(final String emailID) {
+		return Pattern.compile(EMAIL_ID_PATTERN).matcher(emailID).matches();
+
+	}
+
+	/**
+	 * 
+	 * Validate patterns
+	 * 
+	 * @param input
+	 * @param pattern
+	 * @return
+	 */
+	public boolean validatePattern(final String input, String pattern) {
+		return Pattern.compile(pattern).matcher(input).matches();
+
+	}
+
+}

@@ -1,0 +1,52 @@
+package com.sbsc.fos.um.common;
+
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
+public class UserAuthVO {
+	
+	private String userEmail;
+
+	
+	private String userPassword;
+	
+	private String rolename;
+	
+	private long storeid;
+
+	public String getUserEmail() {
+		return userEmail;
+	}
+
+	public void setUserEmail(String userEmail) {
+		this.userEmail = userEmail;
+	}
+
+	public String getUserPassword() {
+		return userPassword;
+	}
+
+	public void setUserPassword(String userPassword) {
+		this.userPassword = userPassword;
+	}
+
+	public String getRolename() {
+		return rolename;
+	}
+
+	public void setRolename(String rolename) {
+		this.rolename = rolename;
+	}
+
+	public long getStoreid() {
+		return storeid;
+	}
+
+	public void setStoreid(long storeid) {
+		this.storeid = storeid;
+	}
+
+
+
+}
